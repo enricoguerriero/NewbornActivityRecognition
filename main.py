@@ -37,8 +37,8 @@ def main():
         wandb = wandb_session(CONFIG["wandb_project"] + "_train", CONFIG)
         logger.info("Training model...")
         model.train_model(train_loader = train_data_loader,
-                          optimizer = model.optimizer,
-                          criterion = model.criterion,
+                          optimizer = CONFIG["optimizer"],
+                          criterion = CONFIG["criterion"],
                           num_pochs = CONFIG["num_epochs"],
                           learning_rate = CONFIG["learning_rate"],
                           momentum = CONFIG["momentum"],
