@@ -8,5 +8,6 @@ CONFIG = {
     "train_annotation_folder": "Data/Annotations",
     "test_video_folder": "Data/Simulations",
     "test_annotation_folder": "Data/Annotations",
-    "num_workers": 1
+    "num_workers": 1,
+    "num_classes": 7
 }

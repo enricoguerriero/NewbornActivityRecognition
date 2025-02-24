@@ -11,7 +11,7 @@ class TimesformerModel(VideoActivityRecognitionModel):
     Supports multi-label classification where multiple events may occur in the same clip.
     """
 
-    def __init__(self, num_event_classes=5, hidden_size=768, threshold=0.5, device='cuda', wandb_project=None, wandb_config=None):
+    def __init__(self, num_event_classes=7, hidden_size=768, threshold=0.5, device='cuda', wandb_project=None, wandb_config=None):
         """
         Initializes the Timesformer model.
         
@@ -23,7 +23,7 @@ class TimesformerModel(VideoActivityRecognitionModel):
             wandb_project (str): Wandb project name (optional).
             wandb_config (dict): Wandb configuration (optional).
         """
-        super(TimesformerModel, self).__init__(device=device, wandb_project=wandb_project, wandb_config=wandb_config)
+        super(TimesformerModel, self).__init__(device=device)
         self.device = device  
         self.threshold = threshold  # threshold for multi-label classification
 
