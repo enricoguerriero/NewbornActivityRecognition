@@ -4,10 +4,10 @@ CONFIG = {
     "train_output_folder": "data/preprocessed/train",
     "train_export_folder": "data/exported/train",
     
-    "val_video_folder": "data/videos/val",
-    "val_annotation_folder": "data/annotations/val",
-    "val_output_folder": "data/preprocessed/val",
-    "val_export_folder": "data/exported/val",
+    "val_video_folder": "data/videos/validation",
+    "val_annotation_folder": "data/annotations/validation",
+    "val_output_folder": "data/preprocessed/validation",
+    "val_export_folder": "data/exported/validation",
     
     "test_video_folder": "data/videos/test",
     "test_annotation_folder": "data/annotations/test",
