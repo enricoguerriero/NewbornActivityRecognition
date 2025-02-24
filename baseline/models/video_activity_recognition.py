@@ -170,6 +170,9 @@ class VideoActivityRecognitionModel(nn.Module, ABC):
                     "epoch": epoch
                 })
             epoch_iter.set_postfix_str(log_message)
+            
+        # save model
+        self.save_model("model")
         
         return history
 
