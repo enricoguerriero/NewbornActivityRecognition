@@ -3,3 +3,6 @@
 /data/tensors
 /data/videos
 /baseline/saved
+/slurm
+/outputs
+
