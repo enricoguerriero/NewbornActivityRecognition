@@ -5,8 +5,8 @@ def main(logger):
     
     logger.debug("Generating dataset...")
     
-    logger.debug(f"Preprocessing videos from {CONFIG['video_folder']}.")
-    logger.debug(f"Using annotations from {CONFIG['annotation_folder']}.")
+    logger.debug(f"Preprocessing videos from {CONFIG['train_video_folder']}.")
+    logger.debug(f"Using annotations from {CONFIG['train_annotation_folder']}.")
     
     preprocessor = ClipPreprocessor(
         video_folder=CONFIG["train_video_folder"],
@@ -20,6 +20,8 @@ def main(logger):
     )
     preprocessor.preprocess_all(logger)
     
+    logger.debug(f"Preprocessing videos from {CONFIG['validation_video_folder']}.")
+    logger.debug(f"Using annotations from {CONFIG['validation_annotation_folder']}.")    
     
     preprocessor = ClipPreprocessor(
         video_folder=CONFIG["validation_video_folder"],
@@ -33,6 +35,8 @@ def main(logger):
     )
     preprocessor.preprocess_all(logger)
     
+    logger.debug(f"Preprocessing videos from {CONFIG['test_video_folder']}.")
+    logger.debug(f"Using annotations from {CONFIG['test_annotation_folder']}.")
     
     preprocessor = ClipPreprocessor(
         video_folder=CONFIG["test_video_folder"],
