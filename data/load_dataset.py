@@ -7,7 +7,7 @@ def main(logger):
     train_dataset = PreprocessedClipDataset(preprocessed_folder=CONFIG["train_output_folder"])
     logger.debug("Train dataset loaded")
     logger.debug("Loading validation dataset...")
-    val_dataset = PreprocessedClipDataset(preprocessed_folder=CONFIG["val_output_folder"])
+    val_dataset = PreprocessedClipDataset(preprocessed_folder=CONFIG["validation_output_folder"])
     logger.debug("Validation dataset loaded")
     logger.debug("Loading test dataset...")
     test_dataset = PreprocessedClipDataset(preprocessed_folder=CONFIG["test_output_folder"])
@@ -15,11 +15,11 @@ def main(logger):
     
     if CONFIG["to_mp4"]:
         logger.debug("Exporting train clips to MP4...")
-        train_dataset.export_all_clips_to_mp4(CONFIG["export_folder"], export_fps=CONFIG["export_fps"], logger = logger)
+        train_dataset.export_all_clips_to_mp4(CONFIG["train_export_folder"], export_fps=CONFIG["export_fps"], logger = logger)
         logger.debug("Exporting validation clips to MP4...")
-        val_dataset.export_all_clips_to_mp4(CONFIG["export_folder"], export_fps=CONFIG["export_fps"], logger = logger)
+        val_dataset.export_all_clips_to_mp4(CONFIG["validation_export_folder"], export_fps=CONFIG["export_fps"], logger = logger)
         logger.debug("Exporting test clips to MP4...")
-        test_dataset.export_all_clips_to_mp4(CONFIG["export_folder"], export_fps=CONFIG["export_fps"], logger = logger)
+        test_dataset.export_all_clips_to_mp4(CONFIG["test_export_folder"], export_fps=CONFIG["export_fps"], logger = logger)
         logger.debug("Clips exported")
         
     logger.debug("Loading data loaders...")
