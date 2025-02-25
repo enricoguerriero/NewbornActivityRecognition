@@ -39,7 +39,7 @@ def main():
         model.train_model(train_loader = train_data_loader,
                           optimizer = define_optimizer(CONFIG["optimizer"], model, CONFIG["learning_rate"], CONFIG["momentum"]),
                           criterion = define_criterion(CONFIG["criterion"]),
-                          num_pochs = CONFIG["epochs"],
+                          num_epochs = CONFIG["epochs"],
                           val_loader = val_data_loader,
                           logger = logger,
                           wandb = wandb)
