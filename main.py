@@ -1,7 +1,7 @@
 import argparse
 from utils.config import CONFIG
 from utils.logger import create_logger
-from utils.utils import select_model, wandb_session
+from utils.utils import select_model, wandb_session, define_optimizer, define_criterion
 
 def main():
     
@@ -18,9 +18,9 @@ def main():
     CONFIG["model_name"] = model_name
     logger = create_logger("main", f"logs/{task}.log")
     
-    logger.info("---------------------")
-    logger.info("... Starting main ...")
-    logger.info("---------------------")
+    logger.info("-----------------------")
+    logger.info(" ... Starting main ... ")
+    logger.info("-----------------------")
     
     if gen_data:
         from data.generate_tensor_dataset import main as generate_data
@@ -37,11 +37,9 @@ def main():
         wandb = wandb_session(CONFIG["wandb_project"] + "_train", CONFIG)
         logger.info("Training model...")
         model.train_model(train_loader = train_data_loader,
-                          optimizer = CONFIG["optimizer"],
-                          criterion = CONFIG["criterion"],
+                          optimizer = define_optimizer(CONFIG["optimizer"], model, CONFIG["learning_rate"], CONFIG["momentum"]),
+                          criterion = define_criterion(CONFIG["criterion"]),
                           num_pochs = CONFIG["num_epochs"],
-                          learning_rate = CONFIG["learning_rate"],
-                          momentum = CONFIG["momentum"],
                           val_loader = val_data_loader,
                           logger = logger,
                           wandb = wandb)
@@ -51,7 +49,7 @@ def main():
         wandb = wandb_session(CONFIG["wandb_project"] + "_test", CONFIG)
         logger.info("Testing model...")
         model.test(test_data_loader,
-                   criterion = model.criterion,
+                   criterion = define_criterion(CONFIG["criterion"]),
                    logger = logger,
                    wandb = wandb)
         logger.info("Model tested")    

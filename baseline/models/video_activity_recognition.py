@@ -15,8 +15,6 @@ class VideoActivityRecognitionModel(nn.Module, ABC):
         
         Args:
             device (str): Device to run on (e.g., 'cuda' or 'cpu').
-            wandb_project (str): Name of the wandb project. If provided, wandb is initialized.
-            wandb_config (dict): Configuration dictionary for wandb.
         """
         super(VideoActivityRecognitionModel, self).__init__()
         # Set device (fallback to CPU if CUDA is not available)
@@ -54,7 +52,7 @@ class VideoActivityRecognitionModel(nn.Module, ABC):
         Args:
             dataloader (DataLoader): DataLoader for training data.
             optimizer (torch.optim.Optimizer): Optimizer.
-            criterion (torch.nn.Module): Loss function (recommended: BCEWithLogitsLoss for multi-label).
+            criterion (torch.nn.Module): Loss function.
             epoch (int): Current epoch.
             verbose (bool): If True, display progress bar.
         
@@ -130,7 +128,7 @@ class VideoActivityRecognitionModel(nn.Module, ABC):
         wandb.log({"test_loss": avg_loss, "test_accuracy": accuracy})
         return avg_loss, accuracy
 
-    def train_model(self, train_loader, optimizer, criterion, num_epochs, learning_rate, momentum, val_loader=None, logger=None, wandb=None):
+    def train_model(self, train_loader, optimizer, criterion, num_epochs, val_loader=None, logger=None, wandb=None):
         """
         Runs the full training cycle over multiple epochs.
         

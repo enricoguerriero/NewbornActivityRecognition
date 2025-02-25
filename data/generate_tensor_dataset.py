@@ -1,4 +1,4 @@
-from data.utils.config import CONFIG
+from utils.config import CONFIG
 from data.classes.preprocessor import ClipPreprocessor
 
 def main(logger):

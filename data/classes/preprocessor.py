@@ -2,7 +2,7 @@ import os
 import cv2
 import torch
 import numpy as np
-from data.utils.utils import collect_event_categories
+from data.utils import collect_event_categories
 from tqdm import tqdm
 
 

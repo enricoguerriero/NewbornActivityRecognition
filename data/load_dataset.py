@@ -1,5 +1,5 @@
 from data.classes.dataset import PreprocessedClipDataset
-from data.utils.config import CONFIG
+from utils.config import CONFIG
 
 def main(logger):
 
