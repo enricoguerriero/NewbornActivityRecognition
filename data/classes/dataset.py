@@ -44,8 +44,14 @@ class PreprocessedClipDataset(Dataset):
             # Use stored sampling_rate if export_fps is not provided.
             if export_fps is None:
                 export_fps = clip_data.get('sampling_rate', 2)
+            # get the label of this clip
+            label = clip_data['labels'] # Tensor of shape [num_labels]
+            label_list = ["BabyVisible", "StimulationTrunk", "StimulationBackNates", "StimulationExtremities", "CPAP", "PPV", "Suction"]
             # Define the output filename.
             base_name = os.path.splitext(os.path.basename(pt_file))[0]
+            for j, event in enumerate(label_list):
+                if label[j] > 0.5:
+                    base_name += f"_{event}"
             output_path = os.path.join(export_folder, base_name + ".mp4")
             fourcc = cv2.VideoWriter_fourcc(*codec)
             out = cv2.VideoWriter(output_path, fourcc, export_fps, (W, H))
@@ -61,5 +67,5 @@ class PreprocessedClipDataset(Dataset):
             
     def get_data_loader(self, batch_size, num_workers):
         return torch.utils.data.DataLoader(
-            self, batch_size=batch_size, shuffle=True, num_workers=num_workers
+            self, batch_size=batch_size, shuffle=True, num_workers=num_workers, drop_last=True
         )

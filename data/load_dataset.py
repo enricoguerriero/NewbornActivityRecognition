@@ -3,15 +3,15 @@ from utils.config import CONFIG
 
 def main(logger):
 
-    logger.debug("Loading train dataset...")
+    logger.debug("Preparing train dataset...")
     train_dataset = PreprocessedClipDataset(preprocessed_folder=CONFIG["train_output_folder"])
-    logger.debug("Train dataset loaded")
-    logger.debug("Loading validation dataset...")
+    logger.debug("Train dataset instanciated")
+    logger.debug("Preparing validation dataset...")
     val_dataset = PreprocessedClipDataset(preprocessed_folder=CONFIG["validation_output_folder"])
-    logger.debug("Validation dataset loaded")
-    logger.debug("Loading test dataset...")
+    logger.debug("Validation dataset instanciated")
+    logger.debug("Preparing test dataset...")
     test_dataset = PreprocessedClipDataset(preprocessed_folder=CONFIG["test_output_folder"])
-    logger.debug("Test dataset loaded")
+    logger.debug("Test dataset instanciated")
     
     if CONFIG["to_mp4"]:
         logger.debug("Exporting train clips to MP4...")
@@ -25,10 +25,25 @@ def main(logger):
     logger.debug("Loading data loaders...")
     train_data_loader = train_dataset.get_data_loader(batch_size=CONFIG["batch_size"], num_workers=CONFIG["num_workers"])
     logger.debug("Dataset loaded")
+    for batch in train_data_loader:
+        input, target = batch
+        logger.debug(f"Input shape: {input.shape}")
+        logger.debug(f"Target shape: {target.shape}")
+        break
     val_data_loader = val_dataset.get_data_loader(batch_size=CONFIG["batch_size"], num_workers=CONFIG["num_workers"])
     logger.debug("Dataset loaded")
+    for batch in val_data_loader:
+        input, target = batch
+        logger.debug(f"Input shape: {input.shape}")
+        logger.debug(f"Target shape: {target.shape}")
+        break
     test_data_loader = test_dataset.get_data_loader(batch_size=CONFIG["batch_size"], num_workers=CONFIG["num_workers"])
     logger.debug("Dataset loaded")
+    for batch in test_data_loader:
+        input, target = batch
+        logger.debug(f"Input shape: {input.shape}")
+        logger.debug(f"Target shape: {target.shape}")
+        break
     
     return train_data_loader, val_data_loader, test_data_loader
     

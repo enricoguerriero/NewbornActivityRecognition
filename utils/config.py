@@ -21,7 +21,7 @@ CONFIG = {
     "test_export_folder": "data/exported/test",
     
     # data loading
-    "to_mp4": True,
+    "to_mp4": False,
     "export_fps": None,
     "batch_size": 16,
     "num_workers": 1,

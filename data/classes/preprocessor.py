@@ -38,8 +38,8 @@ class ClipPreprocessor:
         the same base name as the video (with a .txt extension).
         """
         video_files = sorted(os.listdir(self.video_folder))
-        logger.debug(f"Found {len(video_files)} video files.")
-        logger.debug(f"Event categories: {self.event_categories}")
+        logger.info(f"Found {len(video_files)} video files.")
+        logger.info(f"Event categories: {self.event_categories}")
         for video_file in tqdm(video_files):
             video_path = os.path.join(self.video_folder, video_file)
             base_name, _ = os.path.splitext(video_file)
