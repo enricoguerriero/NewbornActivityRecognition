@@ -1,21 +1,12 @@
-import argparse
 from utils.config import CONFIG
 from utils.logger import create_logger
 from utils.utils import select_model, wandb_session, define_optimizer, define_criterion
 
 def main():
     
-    parser = argparse.ArgumentParser(description='Task to run')
-    parser.add_argument('task', type=str, default='', help='Task to run')
-    parser.add_argument('--model', type=str, default='timesformer', help='Model to use')
-    parser.add_argument('--generate_data', type=str, default=None, help='Generate new data') 
-    
-    args = parser.parse_args()
-    
-    task = args.task
-    gen_data = args.generate_data
-    model_name = args.model
-    CONFIG["model_name"] = model_name
+    task = CONFIG["task"] 
+    gen_data = CONFIG["generate_data"]
+    model_name = CONFIG["model_name"]
     logger = create_logger("main", f"logs/{task}.log")
     
     logger.info("-----------------------")

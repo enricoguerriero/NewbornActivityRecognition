@@ -1,4 +1,9 @@
 CONFIG = {
+    # task
+    "task": ["train", "test"],
+    "generate_data": False,
+    "model_name": "timesformer",
+    
     # folders
     "train_video_folder": "data/videos/train",
     "train_annotation_folder": "data/annotations/train",
@@ -15,10 +20,6 @@ CONFIG = {
     "test_output_folder": "data/preprocessed/test",
     "test_export_folder": "data/exported/test",
     
-    # data generation
-    "T": 0.2,
-    "W": 0,
-
     # data loading
     "to_mp4": True,
     "export_fps": None,
