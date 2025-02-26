@@ -24,7 +24,7 @@ def main():
     
     model = select_model(model_name, logger)
     
-    if task == "train":
+    if "train" in task:
         wandb = wandb_session(CONFIG["wandb_project"] + "_train", CONFIG)
         logger.info("Training model...")
         model.train_model(train_loader = train_data_loader,
@@ -36,7 +36,7 @@ def main():
                           wandb = wandb)
         logger.info("Model trained")
     
-    if task == "test":
+    if "test" in task:
         wandb = wandb_session(CONFIG["wandb_project"] + "_test", CONFIG)
         logger.info("Testing model...")
         model.test(test_data_loader,
