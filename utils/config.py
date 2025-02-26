@@ -22,10 +22,10 @@ CONFIG = {
     # data loading
     "to_mp4": True,
     "export_fps": None,
-    "batch_size": 64,
+    "batch_size": 16,
     "num_workers": 1,
     "clip_length": 2,
-    "frames_per_second": 10,
+    "frames_per_second": 5,
     "overlap": 0.5,
     "target_size": (224, 224),
     "transform": None,
