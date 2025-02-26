@@ -1,7 +1,7 @@
 CONFIG = {
     # task
     "task": ["train", "test"],
-    "generate_data": False,
+    "generate_data": True,
     "model_name": "timesformer",
     
     # folders
@@ -26,7 +26,7 @@ CONFIG = {
     "batch_size": 16,
     "num_workers": 1,
     "clip_length": 2,
-    "frames_per_second": 5,
+    "frames_per_second": 8,
     "overlap": 0.5,
     "target_size": (224, 224),
     "transform": None,
