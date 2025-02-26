@@ -105,7 +105,7 @@ class ClipPreprocessor:
                         'clip_length': self.clip_length,
                         'sampling_rate': self.frames_per_second
                     }
-                    logger.debug(f"clip_data: {clip_data}")
+                    logger.debug(f"tensor dimensions: {frames_tensor.shape}")
                     output_filename = os.path.splitext(os.path.basename(video_path))[0] + f"_clip_{clip_index}.pt"
                     output_filepath = os.path.join(self.output_folder, output_filename)
                     torch.save(clip_data, output_filepath)
