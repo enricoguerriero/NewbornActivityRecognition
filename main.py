@@ -7,7 +7,7 @@ def main():
     task = CONFIG["task"] 
     gen_data = CONFIG["generate_data"]
     model_name = CONFIG["model_name"]
-    logger = create_logger("main", f"logs/{model}_{'_'.join(str(t) for t in task)}.log")
+    logger = create_logger("main", f"logs/{model_name}_{'_'.join(str(t) for t in task)}.log")
     
     logger.info("-----------------------")
     logger.info(" ... Starting main ... ")
