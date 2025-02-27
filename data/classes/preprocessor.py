@@ -84,7 +84,7 @@ class ClipPreprocessor:
                 frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 if self.processor:
                     pil_image = Image.fromarray(frame_rgb)
-                    processed = self.image_processor(pil_image, return_tensors="pt")
+                    processed = self.processor(pil_image, return_tensors="pt")
                     frame_proc = processed["pixel_values"].squeeze(0)
                 elif self.transform:
                     frame_proc = self.transform(frame_rgb)
