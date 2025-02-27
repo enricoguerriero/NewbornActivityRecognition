@@ -2,7 +2,18 @@ CONFIG = {
     # task
     "task": ["train", "test"],
     "generate_data": True,
+    "set_to_generate": ["train", "validation", "test"],
     "model_name": "timesformer",
+    
+    # data creation
+    "clip_length": 2,
+    "frames_per_second": 8,
+    "overlap": 0.5,
+    "to_mp4": False,
+    "transform": True,
+    "target_size": (256, 256),
+    "event_categories": ["Baby visible", "CPAP", "PPV", "Stimulation back/nates",
+                                 "Stimulation extremities", "Stimulation trunk", "Suction"],
     
     # folders
     "train_video_folder": "data/videos/train/",
@@ -19,22 +30,10 @@ CONFIG = {
     "test_annotation_folder": "data/annotations/test/",
     "test_output_folder": "data/preprocessed/test/",
     "test_export_folder": "data/exported/test/",
-    
-    "specific_folder" : "timesformer",
-    
-    # data loading
-    "data_loading": True,
-    "to_mp4": False,
-    "export_fps": None,
+        
+    # training parameters
     "batch_size": 16,
     "num_workers": 1,
-    "clip_length": 2,
-    "frames_per_second": 8,
-    "overlap": 0.5,
-    "target_size": (224, 224),
-    "transform": None,
-    
-    # training parameters
     "epochs": 3,
     "learning_rate": 0.001,
     "num_classes": 7,

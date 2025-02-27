@@ -2,14 +2,15 @@ import torch
 import torch.nn as nn
 from abc import ABC, abstractmethod
 from tqdm import tqdm
+from models.generic_model import GenericModel
 
-class VideoActivityRecognitionModel(nn.Module, ABC):
+class VideoActivityRecognitionModel(GenericModel, ABC):
     """
     Generic base class for video activity recognition models.
     Provides generic training and testing methods.
     """
 
-    def __init__(self, device='cuda'):
+    def __init__(self, device=None):
         """
         Initializes the base model.
         
@@ -18,7 +19,7 @@ class VideoActivityRecognitionModel(nn.Module, ABC):
         """
         super(VideoActivityRecognitionModel, self).__init__()
         # Set device (fallback to CPU if CUDA is not available)
-        self.device = torch.device(device if torch.cuda.is_available() else 'cpu')
+        self.device = torch.device(device) if device else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     @abstractmethod
     def forward(self, x):

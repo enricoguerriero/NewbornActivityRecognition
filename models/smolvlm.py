@@ -1,4 +1,4 @@
-from LLMtesting.models.video_understanding_model import VideoUnderstandingModel
+from models.video_understanding_model import VideoUnderstandingModel
 
 import torch
 from transformers import AutoProcessor, Idefics3ForConditionalGeneration
@@ -29,6 +29,7 @@ class SmolVLMModel(VideoUnderstandingModel):
         self.processor.image_processor.size = (384, 384)
         self.processor.image_processor.do_resize = False
         self.processor.image_processor.do_image_splitting = False
+        self.model_name = "smolvlm"
     
     def answer_question(self, image, question: str, seed: int = 42,
                         top_p: float = 0.95, temperature: float = 0.1) -> str:

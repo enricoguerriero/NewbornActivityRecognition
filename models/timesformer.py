@@ -1,8 +1,6 @@
 from transformers import AutoImageProcessor, TimesformerForVideoClassification
 from torch import nn
-from baseline.models.video_activity_recognition import VideoActivityRecognitionModel    
-import torch
-from tqdm import tqdm
+from models.video_activity_recognition import VideoActivityRecognitionModel    
 
 class TimesformerModel(VideoActivityRecognitionModel):
     """
@@ -35,6 +33,7 @@ class TimesformerModel(VideoActivityRecognitionModel):
         # Custom classification head: outputs logits for each event.
         self.event_classifier = nn.Linear(hidden_size, num_event_classes)
         self.to(self.device)
+        self.model_name = "timesformer"
 
     def forward(self, pixel_values):
         """

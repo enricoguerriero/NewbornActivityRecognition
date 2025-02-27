@@ -1,17 +1,14 @@
 import abc
 import torch
-import cv2
-from tqdm import tqdm
-import os
-from utils.config import CONFIG
+from models.generic_model import GenericModel
 
-class VideoUnderstandingModel(abc.ABC):
+class VideoUnderstandingModel(GenericModel, abc.ABC):
     """
     A generic interface for image understanding models.
     Subclasses should implement the answer_question method.
     """
     def __init__(self, device=None):
-        self.device = device if device is not None else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.device = torch.device(device) if device is not None else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
     @abc.abstractmethod
     def answer_question(self, video, question: str, seed: int = 42,

@@ -24,7 +24,7 @@ class PreprocessedClipDataset(Dataset):
         clip_data = torch.load(self.clip_files[idx])
         return clip_data['frames'], clip_data['labels']
 
-    def export_all_clips_to_mp4(self, export_folder, export_fps=None, codec='mp4v', logger=None):
+    def export_all_clips_to_mp4(self, export_folder, export_fps=None, codec='mp4v', label_list=[], logger=None):
         """
         Exports all .pt clip files as MP4 videos.
         
@@ -46,7 +46,6 @@ class PreprocessedClipDataset(Dataset):
                 export_fps = clip_data.get('sampling_rate', 2)
             # get the label of this clip
             label = clip_data['labels'] # Tensor of shape [num_labels]
-            label_list = ["BabyVisible", "StimulationTrunk", "StimulationBackNates", "StimulationExtremities", "CPAP", "PPV", "Suction"]
             # Define the output filename.
             base_name = os.path.splitext(os.path.basename(pt_file))[0]
             for j, event in enumerate(label_list):

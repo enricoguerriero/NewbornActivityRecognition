@@ -2,55 +2,47 @@ import os
 import cv2
 import torch
 import numpy as np
-from data.utils import collect_event_categories
 from tqdm import tqdm
 from PIL import Image
 
 class ClipPreprocessor:
-    def __init__(self, video_folder, annotation_folder, output_folder,
-                 clip_length=5, frames_per_second=2, overlap=0, target_size=(224, 224),
-                 transform=None, processor = None):
+    def __init__(self, clip_length=5, frames_per_second=2, overlap=0, event_categories=[], transform=None, processor = None):
         """
         Args:
-            video_folder (str): Folder with input videos.
-            annotation_folder (str): Folder with annotation files.
-            output_folder (str): Folder to save the generated clip .pt files.
             clip_length (float): Duration of each clip in seconds.
             frames_per_second (int): Number of frames to sample per second.
             overlap (float): Overlapping duration between consecutive clips (in seconds).
             target_size (tuple): (width, height) to which images are resized.
             transform (callable, optional): Optional transformation applied to each frame.
+            processor (callable, optional): Optional processor applied to each frame.
         """
-        self.video_folder = video_folder
-        self.annotation_folder = annotation_folder
-        self.output_folder = output_folder
-        os.makedirs(self.output_folder, exist_ok=True)
+
         self.clip_length = clip_length
         self.frames_per_second = frames_per_second
         self.overlap = overlap
-        self.target_size = target_size
         self.transform = transform
         self.processor = processor
-        self.event_categories = collect_event_categories(annotation_folder)
+        self.event_categories = event_categories
 
-    def preprocess_all(self, logger=None):
+    def preprocess_all(self, video_folder, annotation_folder, output_folder, logger=None):
         """
         Process all videos in the video_folder. Assumes the annotation file shares
         the same base name as the video (with a .txt extension).
         """
-        video_files = sorted(os.listdir(self.video_folder))
+        os.makedirs(output_folder, exist_ok=True)
+        video_files = sorted(os.listdir(video_folder))
         logger.info(f"Found {len(video_files)} video files.")
-        logger.info(f"Event categories: {self.event_categories}")
+        logger.debug(f"Event categories: {self.event_categories}")
         for video_file in tqdm(video_files):
-            video_path = os.path.join(self.video_folder, video_file)
+            video_path = os.path.join(video_folder, video_file)
             base_name, _ = os.path.splitext(video_file)
-            annotation_path = os.path.join(self.annotation_folder, base_name + ".txt")
+            annotation_path = os.path.join(annotation_folder, base_name + ".txt")
             if not os.path.exists(annotation_path):
                 logger.error(f"Annotation file for {video_file} not found, skipping.")
                 continue
-            self._preprocess_video(video_path, annotation_path, logger)
+            self._preprocess_video(video_path, annotation_path, output_folder, logger)
 
-    def _preprocess_video(self, video_path, annotation_path, logger=None):
+    def _preprocess_video(self, video_path, annotation_path, output_folder, logger=None):
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
             logger.error(f"Error opening video file: {video_path}")
@@ -82,15 +74,14 @@ class ClipPreprocessor:
             if frame_idx % frame_interval == 0:
                 # Process the frame.
                 frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                if self.processor:
-                    pil_image = Image.fromarray(frame_rgb)
-                    processed = self.processor(pil_image, return_tensors="pt")
-                    frame_proc = processed["pixel_values"].squeeze(0)
-                elif self.transform:
+                if self.transform:
                     frame_proc = self.transform(frame_rgb)
                 else:
-                    frame_resized = cv2.resize(frame_rgb, self.target_size)
-                    frame_proc = torch.from_numpy(frame_resized).permute(2, 0, 1).float() / 255.0
+                    frame_proc = Image.fromarray(frame_rgb)
+                if self.processor:
+                    frame_proc = self.processor(frame_proc)
+                else:
+                    frame_proc = torch.from_numpy(frame_rgb).permute(2, 0, 1).float() / 255.0
                 current_clip.append((frame_proc, frame_idx))
                 if len(current_clip) == clip_frame_count:
                     # Get list of absolute frame indices for this clip.
@@ -112,7 +103,7 @@ class ClipPreprocessor:
                     }
                     logger.debug(f"tensor dimensions: {frames_tensor.shape}")
                     output_filename = os.path.splitext(os.path.basename(video_path))[0] + f"_clip_{clip_index}.pt"
-                    output_filepath = os.path.join(self.output_folder, output_filename)
+                    output_filepath = os.path.join(output_folder, output_filename)
                     torch.save(clip_data, output_filepath)
                     logger.debug(f"Saved clip: {output_filepath}")
                     clip_index += 1
