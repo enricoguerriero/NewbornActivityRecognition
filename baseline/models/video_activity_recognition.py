@@ -152,7 +152,7 @@ class VideoActivityRecognitionModel(nn.Module, ABC):
             log_message = f"Epoch {epoch}: Train Loss = {train_loss:.4f} | Train Acc = {train_accuracy:.2f}%"
 
             if val_loader is not None:
-                val_loss, val_accuracy = self.test(val_loader, criterion)
+                val_loss, val_accuracy = self.test(val_loader, criterion, logger, wandb)
                 history["val_loss"].append(val_loss)
                 history["val_accuracy"].append(val_accuracy)
                 log_message += f" | Val Loss = {val_loss:.4f} | Val Acc = {val_accuracy:.2f}%"

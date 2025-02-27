@@ -13,17 +13,18 @@ def main():
     logger.info(" ... Starting main ... ")
     logger.info("-----------------------")
     
-    if gen_data:
-        from data.generate_tensor_dataset import main as generate_data
-        generate_data(logger)
-
-    logger.info("Loading dataset...")
-    from data.load_dataset import main as load_dataset
-    train_data_loader, val_data_loader, test_data_loader = load_dataset(logger)
-    logger.info("Dataset loaded")
-    
     model = select_model(model_name, logger)
     
+    if gen_data:
+        from data.generate_tensor_dataset import main as generate_data
+        generate_data(logger, model)
+
+    logger.info("Loading dataset...")
+    if CONFIG["data_loading"]:
+        from data.load_dataset import main as load_dataset
+        train_data_loader, val_data_loader, test_data_loader = load_dataset(logger)
+        logger.info("Dataset loaded")
+        
     if "train" in task:
         wandb = wandb_session(CONFIG["wandb_project"] + "_train", CONFIG)
         logger.info("Training model...")

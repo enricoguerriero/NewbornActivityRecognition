@@ -4,12 +4,12 @@ import torch
 import numpy as np
 from data.utils import collect_event_categories
 from tqdm import tqdm
-
+from PIL import Image
 
 class ClipPreprocessor:
     def __init__(self, video_folder, annotation_folder, output_folder,
                  clip_length=5, frames_per_second=2, overlap=0, target_size=(224, 224),
-                 transform=None):
+                 transform=None, processor = None):
         """
         Args:
             video_folder (str): Folder with input videos.
@@ -30,6 +30,7 @@ class ClipPreprocessor:
         self.overlap = overlap
         self.target_size = target_size
         self.transform = transform
+        self.processor = processor
         self.event_categories = collect_event_categories(annotation_folder)
 
     def preprocess_all(self, logger=None):
@@ -81,7 +82,11 @@ class ClipPreprocessor:
             if frame_idx % frame_interval == 0:
                 # Process the frame.
                 frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                if self.transform:
+                if self.processor:
+                    pil_image = Image.fromarray(frame_rgb)
+                    processed = self.image_processor(pil_image, return_tensors="pt")
+                    frame_proc = processed["pixel_values"].squeeze(0)
+                elif self.transform:
                     frame_proc = self.transform(frame_rgb)
                 else:
                     frame_resized = cv2.resize(frame_rgb, self.target_size)

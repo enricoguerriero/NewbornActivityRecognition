@@ -1,22 +1,28 @@
 from utils.config import CONFIG
 from data.classes.preprocessor import ClipPreprocessor
 
-def main(logger):
+def main(logger, model=None):
     
     logger.debug("Generating dataset...")
     
     logger.debug(f"Preprocessing videos from {CONFIG['train_video_folder']}.")
     logger.debug(f"Using annotations from {CONFIG['train_annotation_folder']}.")
     
+    if model:
+        processor = model.processor
+    else:
+        processor = None
+    
     preprocessor = ClipPreprocessor(
         video_folder=CONFIG["train_video_folder"],
         annotation_folder=CONFIG["train_annotation_folder"],
-        output_folder=CONFIG["train_output_folder"],
+        output_folder=CONFIG["train_output_folder"]+CONFIG["specific_folder"],
         clip_length=CONFIG["clip_length"],
         frames_per_second=CONFIG["frames_per_second"],
         overlap=CONFIG["overlap"],
         target_size=CONFIG["target_size"],
-        transform=CONFIG["transform"]
+        transform=CONFIG["transform"],
+        processor=processor
     )
     preprocessor.preprocess_all(logger)
     
@@ -26,7 +32,7 @@ def main(logger):
     preprocessor = ClipPreprocessor(
         video_folder=CONFIG["validation_video_folder"],
         annotation_folder=CONFIG["validation_annotation_folder"],
-        output_folder=CONFIG["validation_output_folder"],
+        output_folder=CONFIG["validation_output_folder"]+CONFIG["specific_folder"],
         clip_length=CONFIG["clip_length"],
         frames_per_second=CONFIG["frames_per_second"],
         overlap=CONFIG["overlap"],
@@ -41,7 +47,7 @@ def main(logger):
     preprocessor = ClipPreprocessor(
         video_folder=CONFIG["test_video_folder"],
         annotation_folder=CONFIG["test_annotation_folder"],
-        output_folder=CONFIG["test_output_folder"],
+        output_folder=CONFIG["test_output_folder"]+CONFIG["specific_folder"],
         clip_length=CONFIG["clip_length"],
         frames_per_second=CONFIG["frames_per_second"],
         overlap=CONFIG["overlap"],
