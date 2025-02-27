@@ -79,7 +79,8 @@ class ClipPreprocessor:
                 else:
                     frame_proc = Image.fromarray(frame_rgb)
                 if self.processor:
-                    frame_proc = self.processor(frame_proc)
+                    processed = self.processor(frame_proc, return_tensors="pt")
+                    frame_proc = processed["pixel_values"].squeeze(0)
                 else:
                     frame_proc = torch.from_numpy(frame_rgb).permute(2, 0, 1).float() / 255.0
                 current_clip.append((frame_proc, frame_idx))
