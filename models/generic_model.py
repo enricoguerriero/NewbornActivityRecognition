@@ -57,7 +57,7 @@ class GenericModel(nn.Module, ABC):
         Defines the transformation for the model.
         """
         transform = transforms.Compose([
-            transforms.ToPILImage(),             # Convert numpy array to PIL Image.
-            transforms.Resize(target_size),         # Resize the image.
+            transforms.ToPILImage(),             
+            transforms.Resize(target_size),       
         ])
         return transform

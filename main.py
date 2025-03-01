@@ -56,7 +56,7 @@ def main():
         wandb = model.wandb_session(CONFIG["wandb_project"] + "_train", CONFIG)
         logger.info("Training model...")
         model.train_model(train_loader = train_data_loader,
-                          optimizer = model.define_optimizer(CONFIG["optimizer"], model, CONFIG["learning_rate"], CONFIG["momentum"]),
+                          optimizer = model.define_optimizer(CONFIG["optimizer"], CONFIG["learning_rate"], CONFIG["momentum"]),
                           criterion = model.define_criterion(CONFIG["criterion"]),
                           num_epochs = CONFIG["epochs"],
                           val_loader = val_data_loader,

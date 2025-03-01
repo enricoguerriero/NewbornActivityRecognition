@@ -1,6 +1,6 @@
 from transformers import AutoImageProcessor, TimesformerForVideoClassification
 from torch import nn
-from models.video_activity_recognition import VideoActivityRecognitionModel    
+from models.baseline.video_activity_recognition import VideoActivityRecognitionModel    
 
 class TimesformerModel(VideoActivityRecognitionModel):
     """
