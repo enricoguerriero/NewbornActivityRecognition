@@ -208,5 +208,5 @@ class VideoActivityRecognitionModel(GenericModel, ABC):
         torch.save({
             'epoch': epoch,
             'model_state_dict': self.state_dict(),
-            'optimizer_state_dict': optimizer.state_dict() if optimizer else None,
+            'optimizer_state_dict': optimizer.state_dict(),
         }, save_path)

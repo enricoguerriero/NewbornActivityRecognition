@@ -21,8 +21,10 @@ class PreprocessedClipDataset(Dataset):
         return len(self.clip_files)
 
     def __getitem__(self, idx):
-        clip_data = torch.load(self.clip_files[idx], weights_only=True)
-        return clip_data['frames'], clip_data['labels']
+        clip_data = torch.load(self.clip_files[idx])
+        frames = clip_data['frames'].squeeze(1)
+        return frames, clip_data['labels']
+
 
     def export_all_clips_to_mp4(self, export_folder, export_fps=None, codec='mp4v', label_list=[], logger=None):
         """
