@@ -28,23 +28,23 @@ def main():
         for set_name in CONFIG["set_to_generate"]:
             preprocessor.preprocess_all(video_folder = CONFIG[f"{set_name}_video_folder"], 
                                         annotation_folder = CONFIG[f"{set_name}_annotation_folder"],
-                                        output_folder = CONFIG[f"{set_name}_output_folder"], 
+                                        output_folder = CONFIG[f"{set_name}_output_folder"] + "/" + model_name, 
                                         logger = logger)
         logger.info("Clips preprocessed")
 
-    train_dataset = PreprocessedClipDataset(CONFIG["train_output_folder"]) if "train" in task else None
-    val_dataset = PreprocessedClipDataset(CONFIG["validation_output_folder"]) if "train" in task else None
-    test_dataset = PreprocessedClipDataset(CONFIG["test_output_folder"]) if "test" in task else None
+    train_dataset = PreprocessedClipDataset(CONFIG["train_output_folder"] + "/" + model_name) if "train" in task else None
+    val_dataset = PreprocessedClipDataset(CONFIG["validation_output_folder"] + "/" + model_name) if "train" in task else None
+    test_dataset = PreprocessedClipDataset(CONFIG["test_output_folder"] + "/" + model_name) if "test" in task else None
     
     if CONFIG["to_mp4"]:
         logger.info("Exporting clips to MP4...")
-        train_dataset.export_all_clips_to_mp4(CONFIG["train_export_folder"],
+        train_dataset.export_all_clips_to_mp4(CONFIG["train_export_folder"] + "/" + model_name,
                                               label_list = CONFIG["event_categories"],
                                               logger = logger) if "train" in task else None
-        val_dataset.export_all_clips_to_mp4(CONFIG["validation_export_folder"], 
+        val_dataset.export_all_clips_to_mp4(CONFIG["validation_export_folder"] + "/" + model_name, 
                                             label_list = CONFIG["event_categories"], 
                                             logger = logger) if "train" in task else None
-        test_dataset.export_all_clips_to_mp4(CONFIG["test_export_folder"], 
+        test_dataset.export_all_clips_to_mp4(CONFIG["test_export_folder"] + "/" + model_name, 
                                              label_list = CONFIG["event_categories"], 
                                              logger = logger) if "test" in task else None
         logger.info("Clips exported to MP4")
