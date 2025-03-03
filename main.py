@@ -24,7 +24,7 @@ def main():
                                         overlap = CONFIG["overlap"],
                                         event_categories = CONFIG["event_categories"],
                                         transform = transform,
-                                        processor = model.processor)
+                                        processor = model.processor if hasattr(model, "processor") else None)
         for set_name in CONFIG["set_to_generate"]:
             preprocessor.preprocess_all(video_folder = CONFIG[f"{set_name}_video_folder"], 
                                         annotation_folder = CONFIG[f"{set_name}_annotation_folder"],
