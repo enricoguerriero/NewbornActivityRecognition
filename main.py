@@ -34,7 +34,7 @@ def main():
 
     train_dataset = PreprocessedClipDataset(CONFIG["train_output_folder"] + "/" + model_name) if "train" in task else None
     val_dataset = PreprocessedClipDataset(CONFIG["validation_output_folder"] + "/" + model_name) if "train" in task else None
-    test_dataset = PreprocessedClipDataset(CONFIG["test_output_folder"] + "/" + model_name) if "test" in task else None
+    test_dataset = PreprocessedClipDataset(CONFIG["test_output_folder"] + "/" + model_name) if "test" or "test untrained" in task else None
     
     if CONFIG["to_mp4"]:
         logger.info("Exporting clips to MP4...")
