@@ -9,6 +9,7 @@ class VideoUnderstandingModel(GenericModel, abc.ABC):
     Subclasses should implement the answer_question method.
     """
     def __init__(self, device=None):
+        super(VideoUnderstandingModel, self).__init__()
         self.device = torch.device(device) if device is not None else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
     @abc.abstractmethod
