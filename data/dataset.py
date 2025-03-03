@@ -25,6 +25,7 @@ class PreprocessedClipDataset(Dataset):
         frames = clip_data['frames'].squeeze(1)
         return frames, clip_data['labels']
 
+
     def export_all_clips_to_mp4(self, export_folder, export_fps=None, codec='mp4v', label_list=[], logger=None):
         """
         Exports all .pt clip files as MP4 videos.
@@ -37,7 +38,7 @@ class PreprocessedClipDataset(Dataset):
         """
         os.makedirs(export_folder, exist_ok=True)
         for pt_file in tqdm(self.clip_files):
-            clip_data = torch.load(pt_file)
+            clip_data = torch.load(pt_file, weights_only=True)
             frames = clip_data['frames']  # Tensor of shape [num_frames, C, H, W]
             # Convert frames to numpy array in HxWxC format.
             frames_np = frames.permute(0, 2, 3, 1).cpu().numpy()

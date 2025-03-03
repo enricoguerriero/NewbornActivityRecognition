@@ -61,3 +61,4 @@ class GenericModel(nn.Module, ABC):
             transforms.Resize(target_size),       
         ])
         return transform
+    

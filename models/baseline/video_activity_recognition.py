@@ -182,7 +182,7 @@ class VideoActivityRecognitionModel(GenericModel, ABC):
         Args:
             path (str): Path to save the model.
         """
-        save_path = "baseline/saved" + path + ".pt"
+        save_path = "models/saved" + path + ".pt"
         torch.save(self.state_dict(), save_path)
         
     def load_model(self, path):
@@ -192,7 +192,7 @@ class VideoActivityRecognitionModel(GenericModel, ABC):
         Args:
             path (str): Path to load the model from.
         """
-        load_path = "baseline/saved" + path + ".pt"
+        load_path = "models/saved" + path + ".pt"
         self.load_state_dict(torch.load(load_path))
         
     def save_checkpoint(self, path, optimizer, epoch):
@@ -204,7 +204,7 @@ class VideoActivityRecognitionModel(GenericModel, ABC):
             optimizer (torch.optim.Optimizer): Optimizer.
             epoch (int): Current epoch.
         """
-        save_path = "baseline/saved/checkpoints" + path + ".pt"
+        save_path = "models/saved/checkpoints" + path + ".pt"
         torch.save({
             'epoch': epoch,
             'model_state_dict': self.state_dict(),

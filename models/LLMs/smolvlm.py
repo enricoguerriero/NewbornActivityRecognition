@@ -13,7 +13,7 @@ class SmolVLMModel(VideoUnderstandingModel):
         super().__init__(device)
         
         # Load processor and model
-        self.processor = AutoProcessor.from_pretrained(base_model_id)
+        self.prompt_processor = AutoProcessor.from_pretrained(base_model_id)
         if checkpoint_path:
             self.model = Idefics3ForConditionalGeneration.from_pretrained(
                 checkpoint_path,
@@ -27,12 +27,12 @@ class SmolVLMModel(VideoUnderstandingModel):
                 device_map=device
             )
         
-        self.processor.image_processor.size = (384, 384)
-        self.processor.image_processor.do_resize = False
-        self.processor.image_processor.do_image_splitting = False
+        self.prompt_processor.image_processor.size = (384, 384)
+        self.prompt_processor.image_processor.do_resize = False
+        self.prompt_processor.image_processor.do_image_splitting = False
         self.model_name = "smolvlm"
     
-    def answer_question(self, video_tensor, question: str, seed: int = 42,
+    def answer_question(self, video_tensor, questions: list, seed: int = 42,
                         top_p: float = 0.95, temperature: float = 0.1) -> str:
         """
         Given an image and a question, generate an answer using SmolVLM.
@@ -44,31 +44,36 @@ class SmolVLMModel(VideoUnderstandingModel):
         
         image_tokens = [{"type": "image"} for _ in range(len(image_list))]
         
-        prompt = [
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": "Answer briefly."},
-                    *image_tokens,
-                    {"type": "text", "text": question}
-                ]
-            }
-        ]
+        response = []
         
-        inputs = self.processor(
-            text=self.processor.apply_chat_template(prompt, add_generation_prompt=True),
-            images=image_list,
-            return_tensors="pt"
-        ).to(self.device)
-        
-        outputs = self.generate(
-            **inputs,
-            max_new_tokens=100,
-            num_beams=5,
-            temperature=0.7,
-            do_sample=True,
-            use_cache=True
-        )
-        
-        response = self.processor.decode(outputs[0], skip_special_tokens=True)
+        for question in questions:
+            
+            prompt = [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": "Answer using just 0 or 1 following the instruction."},
+                        *image_tokens,
+                        {"type": "text", "text": question}
+                    ]
+                }
+            ]
+            
+            inputs = self.prompt_processor(
+                text=self.prompt_processor.apply_chat_template(prompt, add_generation_prompt=True),
+                images=image_list,
+                return_tensors="pt"
+            ).to(self.device)
+            
+            outputs = self.model.generate(
+                **inputs,
+                max_new_tokens=100,
+                num_beams=5,
+                temperature=0.7,
+                do_sample=True,
+                use_cache=True
+            )
+            
+            response.append(self.prompt_processor.decode(outputs[0], skip_special_tokens=True))
+            
         return response

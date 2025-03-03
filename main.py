@@ -71,7 +71,15 @@ def main():
                    criterion = model.define_criterion(CONFIG["criterion"]),
                    logger = logger,
                    wandb = wandb)
-        logger.info("Model tested")    
+        logger.info("Model tested")  
+        
+    if "test untrained" in task:
+        wandb = model.wandb_session(CONFIG["wandb_project"] + "_test_untrained", CONFIG)
+        logger.info("Testing untrained model...")
+        model.test_without_knowledge(test_dataset,
+                   logger = logger,
+                   wandb = wandb)
+        logger.info("Model tested")  
     
 
 
