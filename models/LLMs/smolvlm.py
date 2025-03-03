@@ -32,7 +32,7 @@ class SmolVLMModel(VideoUnderstandingModel):
         self.prompt_processor.image_processor.do_image_splitting = False
         self.model_name = "smolvlm"
     
-    def answer_question(self, video_tensor, questions: list, seed: int = 42,
+    def answer_questions(self, video_tensor, questions: list, seed: int = 42,
                         top_p: float = 0.95, temperature: float = 0.1) -> str:
         """
         Given an image and a question, generate an answer using SmolVLM.
