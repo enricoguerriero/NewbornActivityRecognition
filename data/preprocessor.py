@@ -84,7 +84,7 @@ class ClipPreprocessor:
                     processed = self.processor(frame_proc, return_tensors="pt")
                     frame_proc = processed["pixel_values"].squeeze(0)
                 else:
-                    frame_proc = torch.from_numpy(frame_rgb).permute(2, 0, 1).float() / 255.0
+                    frame_proc = torch.from_numpy(frame_proc).permute(2, 0, 1).float() / 255.0
                     print(f"frame_proc shape after processor: {frame_proc.shape}", flush=True)
                 current_clip.append((frame_proc, frame_idx))
                 if len(current_clip) == clip_frame_count:
