@@ -63,7 +63,9 @@ class SmolVLMModel(VideoUnderstandingModel):
                 text=self.prompt_processor.apply_chat_template(prompt, add_generation_prompt=True),
                 images=image_list,
                 return_tensors="pt"
-            ).to(self.device)
+            )
+            
+            inputs = {k: v.to(self.device) for k, v in inputs.items()}
             
             outputs = self.model.generate(
                 **inputs,
