@@ -76,13 +76,14 @@ class ClipPreprocessor:
                 frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 if self.transform:
                     frame_proc = self.transform(frame_rgb)
-                else:
+                elif self.processor:
                     frame_proc = Image.fromarray(frame_rgb)
+                else:
+                    frame_proc = torch.tensor(frame_rgb, dtype=torch.float32)
                 if self.processor:
                     processed = self.processor(frame_proc, return_tensors="pt")
                     frame_proc = processed["pixel_values"].squeeze(0)
                 else:
-                    frame_proc = torch.tensor(frame_proc, dtype=torch.float32)
                     frame_proc = frame_proc.permute(2, 0, 1).float() / 255.0
                 current_clip.append((frame_proc, frame_idx))
                 if len(current_clip) == clip_frame_count:
