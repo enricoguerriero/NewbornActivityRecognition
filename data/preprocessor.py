@@ -74,8 +74,10 @@ class ClipPreprocessor:
             if frame_idx % frame_interval == 0:
                 # Process the frame.
                 frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                print(f"frame_rgb shape: {frame_rgb.shape}", flush=True)
                 if self.transform:
                     frame_proc = self.transform(frame_rgb)
+                    print(f"frame_proc shape after transformation: {frame_proc.shape}", flush=True)
                 else:
                     frame_proc = Image.fromarray(frame_rgb)
                 if self.processor:
@@ -83,6 +85,7 @@ class ClipPreprocessor:
                     frame_proc = processed["pixel_values"].squeeze(0)
                 else:
                     frame_proc = torch.from_numpy(frame_rgb).permute(2, 0, 1).float() / 255.0
+                    print(f"frame_proc shape after processor: {frame_proc.shape}", flush=True)
                 current_clip.append((frame_proc, frame_idx))
                 if len(current_clip) == clip_frame_count:
                     # Get list of absolute frame indices for this clip.
