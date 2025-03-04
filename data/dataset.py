@@ -16,7 +16,6 @@ class PreprocessedClipDataset(Dataset):
             for f in os.listdir(preprocessed_folder)
             if f.endswith('.pt')
         ])
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     def __len__(self):
         return len(self.clip_files)
@@ -25,7 +24,7 @@ class PreprocessedClipDataset(Dataset):
         clip_data = torch.load(self.clip_files[idx])
         frames = clip_data['frames'].squeeze()
         labels = clip_data['labels']
-        return frames.to(self.device), labels.to(self.device)
+        return frames, labels
 
 
     def export_all_clips_to_mp4(self, export_folder, export_fps=None, codec='mp4v', label_list=[], logger=None):

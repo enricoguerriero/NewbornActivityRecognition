@@ -39,6 +39,8 @@ class VideoUnderstandingModel(GenericModel, abc.ABC):
         dataset = tqdm(dataset, desc="Testing model")
         
         for frames, labels in dataset:
+            frames = frames.to(self.device)
+            labels = labels.to(self.device)
             answers = self.answer_questions(frames, questions)
             for question, answer, label in zip(questions, answers, labels):
                 topic_stats[question]['total'] += 1
