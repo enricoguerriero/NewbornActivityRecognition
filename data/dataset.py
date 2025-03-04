@@ -2,7 +2,7 @@ import os
 import cv2
 import torch
 import numpy as np
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
 
 class PreprocessedClipDataset(Dataset):
@@ -22,7 +22,7 @@ class PreprocessedClipDataset(Dataset):
 
     def __getitem__(self, idx):
         clip_data = torch.load(self.clip_files[idx])
-        frames = clip_data['frames'].squeeze(1)
+        frames = clip_data['frames']
         return frames, clip_data['labels']
 
 
@@ -67,6 +67,6 @@ class PreprocessedClipDataset(Dataset):
             
             
     def get_data_loader(self, batch_size, num_workers):
-        return torch.utils.data.DataLoader(
+        return DataLoader(
             self, batch_size=batch_size, shuffle=True, num_workers=num_workers, drop_last=True
-        )
+        ).squeeze()
