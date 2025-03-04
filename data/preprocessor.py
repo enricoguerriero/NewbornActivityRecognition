@@ -77,12 +77,15 @@ class ClipPreprocessor:
                 if self.transform:
                     frame_proc = self.transform(frame_rgb)
                 else:
-                    frame_proc = Image.fromarray(frame_rgb)
+                    if self.processor:
+                        frame_proc = Image.fromarray(frame_rgb)
+                    else:
+                        frame_proc = torch.tensor(frame_rgb, dtype=torch.float32)
                 if self.processor:
                     processed = self.processor(frame_proc, return_tensors="pt")
                     frame_proc = processed["pixel_values"].squeeze(0)
                 else:
-                    frame_proc = torch.from_numpy(frame_proc).permute(2, 0, 1).float() / 255.0
+                    frame_proc = frame_proc.permute(2, 0, 1).float() / 255.0
                 current_clip.append((frame_proc, frame_idx))
                 if len(current_clip) == clip_frame_count:
                     # Get list of absolute frame indices for this clip.
