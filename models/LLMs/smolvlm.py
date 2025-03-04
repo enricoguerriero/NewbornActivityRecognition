@@ -17,15 +17,15 @@ class SmolVLMModel(VideoUnderstandingModel):
         if checkpoint_path:
             self.model = Idefics3ForConditionalGeneration.from_pretrained(
                 checkpoint_path,
-                torch_dtype=torch.bfloat16,
-                device_map=self.device
-            )
+                torch_dtype=torch.bfloat16#,
+                # device_map=self.device
+            ).to(self.device)
         else:
             self.model = Idefics3ForConditionalGeneration.from_pretrained(
                 base_model_id,
-                torch_dtype=torch.bfloat16,
-                device_map=self.device
-            )
+                torch_dtype=torch.bfloat16#,
+                # device_map=self.device
+            ).to(self.device)
         
         self.prompt_processor.image_processor.size = (384, 384)
         self.prompt_processor.image_processor.do_resize = False
