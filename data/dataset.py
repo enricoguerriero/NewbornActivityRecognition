@@ -23,7 +23,7 @@ class PreprocessedClipDataset(Dataset):
 
     def __getitem__(self, idx):
         clip_data = torch.load(self.clip_files[idx])
-        frames = clip_data['frames']
+        frames = clip_data['frames'].squeeze()
         labels = clip_data['labels']
         return frames.to(self.device), labels.to(self.device)
 
@@ -71,4 +71,4 @@ class PreprocessedClipDataset(Dataset):
     def get_data_loader(self, batch_size, num_workers):
         return DataLoader(
             self, batch_size=batch_size, shuffle=True, num_workers=num_workers, drop_last=True
-        ).squeeze()
+        )
