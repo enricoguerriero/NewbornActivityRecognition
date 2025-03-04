@@ -69,7 +69,7 @@ class SmolVLMModel(VideoUnderstandingModel):
             
             outputs = self.model.generate(
                 **inputs,
-                max_new_tokens=100,
+                max_new_tokens=50,
                 num_beams=5,
                 temperature=0.7,
                 do_sample=True,
