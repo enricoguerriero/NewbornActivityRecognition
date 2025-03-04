@@ -39,6 +39,7 @@ class VideoUnderstandingModel(GenericModel, abc.ABC):
         dataset = tqdm(dataset, desc="Testing model")
         
         for frames, labels in dataset:
+            torch.cuda.empty_cache()
             frames = frames.to(self.device)
             labels = labels.to(self.device)
             answers = self.answer_questions(frames, questions)
