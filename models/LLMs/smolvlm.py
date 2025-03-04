@@ -18,13 +18,13 @@ class SmolVLMModel(VideoUnderstandingModel):
             self.model = Idefics3ForConditionalGeneration.from_pretrained(
                 checkpoint_path,
                 torch_dtype=torch.bfloat16,
-                device_map=device
+                device_map=self.device
             )
         else:
             self.model = Idefics3ForConditionalGeneration.from_pretrained(
                 base_model_id,
                 torch_dtype=torch.bfloat16,
-                device_map=device
+                device_map=self.device
             )
         
         self.prompt_processor.image_processor.size = (384, 384)
