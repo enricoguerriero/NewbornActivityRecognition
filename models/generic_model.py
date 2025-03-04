@@ -56,7 +56,7 @@ class GenericModel(nn.Module, ABC):
         """
         Defines the transformation for the model.
         """
-        if hasattr(self, "processor"):
+        if not hasattr(self, "processor"):
             transform = transforms.Compose([
                 transforms.ToPILImage(),             
                 transforms.Resize(target_size),  
