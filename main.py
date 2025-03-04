@@ -65,9 +65,11 @@ def main():
         logger.info("Model trained")
     
     if "test" in task:
+        logger.info("Loading data...")
+        test_data_loader = test_dataset.get_data_loader(CONFIG["batch_size"], CONFIG["num_workers"])
         wandb = model.wandb_session(CONFIG["wandb_project"] + "_test", CONFIG)
         logger.info("Testing model...")
-        model.test(test_dataset,
+        model.test(test_data_loader,
                    criterion = model.define_criterion(CONFIG["criterion"]),
                    logger = logger,
                    wandb = wandb)

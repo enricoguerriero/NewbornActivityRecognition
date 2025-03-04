@@ -91,7 +91,7 @@ class VideoActivityRecognitionModel(GenericModel, ABC):
         accuracy = 100 * total_correct / total_labels if total_labels > 0 else 0
         return avg_loss, accuracy
 
-    def test(self, dataloader, criterion, logger, wandb):
+    def test(self, dataloader, criterion, logger, wandb = None):
         """
         Evaluates the model on the test set.
         
@@ -126,7 +126,8 @@ class VideoActivityRecognitionModel(GenericModel, ABC):
         avg_loss = running_loss / len(dataloader)
         accuracy = 100 * total_correct / total_labels if total_labels > 0 else 0
         logger.debug(f"Test Loss = {avg_loss:.4f} | Test Acc = {accuracy:.2f}%")
-        wandb.log({"test_loss": avg_loss, "test_accuracy": accuracy})
+        if wandb:
+            wandb.log({"test_loss": avg_loss, "test_accuracy": accuracy}) 
         return avg_loss, accuracy
 
     def train_model(self, train_loader, optimizer, criterion, num_epochs, val_loader=None, logger=None, wandb=None):
@@ -153,7 +154,7 @@ class VideoActivityRecognitionModel(GenericModel, ABC):
             log_message = f"Epoch {epoch}: Train Loss = {train_loss:.4f} | Train Acc = {train_accuracy:.2f}%"
 
             if val_loader is not None:
-                val_loss, val_accuracy = self.test(val_loader, criterion, logger, wandb)
+                val_loss, val_accuracy = self.test(val_loader, criterion, logger)
                 history["val_loss"].append(val_loss)
                 history["val_accuracy"].append(val_accuracy)
                 log_message += f" | Val Loss = {val_loss:.4f} | Val Acc = {val_accuracy:.2f}%"
