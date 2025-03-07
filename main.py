@@ -1,5 +1,5 @@
 from config import CONFIG
-from utils import setup_all_loggers, select_model
+from utils import setup_all_loggers, select_model, wandb_session
 import logging
 from data.dataset import VideoDataset
 import os
@@ -19,7 +19,7 @@ def main():
     
     model = select_model(model_name)
     
-    wandb = wandb.init(project=CONFIG["wandb_project"], name=model_name, config=CONFIG)
+    wandb = wandb_session(CONFIG["wandb_project"], model_name, CONFIG)
     
     if "preprocessing" in tasks:
         logger.info("...Preprocessing videos...")

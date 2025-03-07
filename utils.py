@@ -1,4 +1,5 @@
 import logging
+import wandb
 
 def setup_logger(name, filename):
     """Function to setup a logger."""
@@ -43,3 +44,7 @@ def select_engine(engine_name):
         return SmolVLMEngine()
     else:
         raise ValueError(f"Engine {engine_name} not available")
+    
+def wandb_session(project_name, model_name, config):
+    wandb.init(project=project_name + " - " + model_name, config=config)
+    return wandb
