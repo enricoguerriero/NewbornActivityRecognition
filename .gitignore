@@ -1,0 +1,8 @@
+data/videos
+data/annotations
+data/processed
+data/exported
+logs/
+configList/
+slurm/
+outputs/
