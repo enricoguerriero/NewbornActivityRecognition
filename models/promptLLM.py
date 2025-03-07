@@ -7,6 +7,7 @@ import numpy as np
 import cv2
 import os
 from PIL import Image
+import logging
 
 class PromptLLMModel(BaseVideoModel):
     def __init__(self, prompt_engine: PromptEngine, num_classes = 7):
@@ -17,7 +18,7 @@ class PromptLLMModel(BaseVideoModel):
         super(PromptLLMModel, self).__init__()
         self.prompt_engine = prompt_engine  # This should be callable.
         # A mapping layer that converts prompt output to desired classification logits.
-        self.mapping = nn.Linear(prompt_engine.output_dim, num_classes)
+        # self.mapping = nn.Linear(prompt_engine.output_dim, num_classes)
     
     def forward(self, x):
         # x is expected to be a list of PIL images (or a batch of lists)
@@ -28,7 +29,7 @@ class PromptLLMModel(BaseVideoModel):
         self.mapping = new_layer_config
         return self
 
-    def test_without_knowledge(self, dataloader: DataLoader, questions: list[str] = None, logger=None, wandb=None):
+    def test_without_knowledge(self, dataloader: DataLoader, questions: list[str] = None, wandb=None):
         """
         Test the model on a dataset without using extra knowledge from the prompt engine.
         For each sample (video clip) from the dataloader, the prompt engine is queried with a list of binary
@@ -44,6 +45,8 @@ class PromptLLMModel(BaseVideoModel):
         :param wandb: Optional wandb instance for logging.
         :return: Dictionary mapping each question to its accuracy.
         """
+        logger = logging.getLogger(f'{self.model_name}_test_untrained')
+        
         # Default questions if none provided.
         if questions is None:
             questions = [

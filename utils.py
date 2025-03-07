@@ -29,12 +29,12 @@ def setup_all_loggers(model_name: str, tasks: list):
 def select_model(model_name):
     """Function to select a model."""
     if model_name == "timesformer":
-        from models.timesformer import Timesformer
-        return Timesformer()
+        from models.timesformer import TimesformerModel
+        return TimesformerModel()
     else:
-        from models.promptLLM import PromptLLM
+        from models.promptLLM import PromptLLMModel
         engine = select_engine(model_name)
-        return PromptLLM(engine)
+        return PromptLLMModel(engine)
     
 def select_engine(engine_name):
     """Function to select an engine."""

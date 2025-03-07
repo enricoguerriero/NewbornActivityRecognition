@@ -1,7 +1,7 @@
 CONFIG = {
     # task
     "task": ["preprocessing", "test_untrained"],
-    "model_name": "timesformer",
+    "model_name": "smolvlm",
     
     # data creation
     "clip_length": 2,
