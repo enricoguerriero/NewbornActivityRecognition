@@ -25,9 +25,11 @@ def main():
         logger.info("...Preprocessing videos...")
         model.transform = model.define_transformation(CONFIG["target_size"]) 
         model.preprocess_videos(set_name = "train", clip_length = CONFIG["clip_length"], frames_per_second = CONFIG["frames_per_second"],
-                                overlap = CONFIG["overlap"], event_categories = ["event_categories"]) if "train" in tasks else None
-        model.preprocess_videos(set_name = "validation") if "train" in tasks else None
-        model.preprocess_videos("test") if "test" or "untrained_test" in tasks else None
+                                overlap = CONFIG["overlap"], event_categories = CONFIG["event_categories"]) if "train" in tasks else None
+        model.preprocess_videos(set_name = "validation", clip_length = CONFIG["clip_length"], frames_per_second = CONFIG["frames_per_second"],
+                                overlap = CONFIG["overlap"], event_categories = CONFIG["event_categories"]) if "train" in tasks else None
+        model.preprocess_videos(set_name = "test", clip_length = CONFIG["clip_length"], frames_per_second = CONFIG["frames_per_second"],
+                                overlap = CONFIG["overlap"], event_categories = CONFIG["event_categories"]) if "test" or "untrained_test" in tasks else None
         
     logger.info("...Loading data...")
         
