@@ -17,13 +17,20 @@ def main():
     logger.info("...Starting the main function...")
     logger.info("--------------------------------")
     
+    logger.info(f"Tasks: {tasks}")
+    logger.info(f"Model: {model_name}")
     model = select_model(model_name)
+    logger.info(f"Model initialized: {model_name}")
     
     wandb = wandb_session(CONFIG["wandb_project"], model_name, CONFIG)
+    logger.info(f"Wandb session started: {CONFIG['wandb_project']} - {model_name}")
+    
+    logger.debug(f'Configuration: {CONFIG}')
     
     if "preprocessing" in tasks:
         logger.info("...Preprocessing videos...")
         model.transform = model.define_transformation(CONFIG["target_size"]) 
+        logger.debug(f"Transform: {model.transform}")
         model.preprocess_videos(set_name = "train", clip_length = CONFIG["clip_length"], frames_per_second = CONFIG["frames_per_second"],
                                 overlap = CONFIG["overlap"], event_categories = CONFIG["event_categories"]) if "train" in tasks else None
         model.preprocess_videos(set_name = "validation", clip_length = CONFIG["clip_length"], frames_per_second = CONFIG["frames_per_second"],

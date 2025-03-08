@@ -15,7 +15,7 @@ class PromptLLMModel(BaseVideoModel):
         :param prompt_engine: An instance of a prompt engine (e.g., a small LLM handling PIL images).
         :param num_classes: Number of activity classes.
         """
-        super(PromptLLMModel, self).__init__()
+        super(PromptLLMModel, self).__init__(model_name=prompt_engine.name)
         self.prompt_engine = prompt_engine  # This should be callable.
         # A mapping layer that converts prompt output to desired classification logits.
         # self.mapping = nn.Linear(prompt_engine.output_dim, num_classes)

@@ -4,7 +4,6 @@ import os
 from tqdm import tqdm
 from torchvision.transforms import transforms
 import cv2
-from PIL import Image
 import numpy as np
 import torch
 
@@ -13,9 +12,9 @@ class BaseVideoModel(nn.Module):
     An abstract base class for video models.
     Provides a common interface for training, inference, and last-layer modifications.
     """
-    def __init__(self):
+    def __init__(self, model_name: str = "baseModel"):
         super(BaseVideoModel, self).__init__()
-        self.model_name = "baseModel"
+        self.model_name = model_name
         self.video_folder = "data/videos"
         self.annotation_folder = "data/annotations"
         self.output_folder = "data/processed/" + self.model_name
@@ -44,6 +43,8 @@ class BaseVideoModel(nn.Module):
 
         logger = logging.getLogger(f'{self.model_name}_preprocessing')
         logger.info(f"Preprocessing videos for {set_name} set.")
+        
+        logger.debug(f'Input parameters: {set_name}, {clip_length}, {frames_per_second}, {overlap}, {event_categories}')
         
         video_folder = os.path.join(self.video_folder, set_name)
         annotation_folder = os.path.join(self.annotation_folder, set_name)
