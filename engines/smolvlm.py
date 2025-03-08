@@ -34,6 +34,8 @@ class SmolVLMEngine(PromptEngine):
         # Set the model to evaluation mode.
         self.model.eval()
         
+        self.name = "smolvlm"
+        
     
     def prompt_definition(self, image_tokens: list, question: str):
         

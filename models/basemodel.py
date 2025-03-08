@@ -15,7 +15,7 @@ class BaseVideoModel(nn.Module):
     """
     def __init__(self):
         super(BaseVideoModel, self).__init__()
-        self.model_name = "base model"
+        self.model_name = "baseModel"
         self.video_folder = "data/videos"
         self.annotation_folder = "data/annotations"
         self.output_folder = "data/processed/" + self.model_name
@@ -143,7 +143,7 @@ class BaseVideoModel(nn.Module):
         return transforms.Compose([
             transforms.ToPILImage(),
             transforms.Resize(target_size),
-            transforms.ToTensor()
+            # transforms.ToTensor()
         ])
         
 
@@ -151,10 +151,7 @@ class BaseVideoModel(nn.Module):
         """
         Process a single frame (RGB) before passing to the model.
         """
-        if self.transform is not None:
-            frame_proc = self.transform(frame_rgb)
-        else:
-            frame_proc = Image.fromarray(frame_rgb)
+        frame_proc = self.transform(frame_rgb)
         if self.image_processor is not None:
             frame_proc = self.image_processor(frame_proc)
         else:

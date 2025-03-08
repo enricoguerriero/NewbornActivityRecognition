@@ -19,6 +19,7 @@ class PromptLLMModel(BaseVideoModel):
         self.prompt_engine = prompt_engine  # This should be callable.
         # A mapping layer that converts prompt output to desired classification logits.
         # self.mapping = nn.Linear(prompt_engine.output_dim, num_classes)
+        self.model_name = prompt_engine.name
     
     def forward(self, x):
         # x is expected to be a list of PIL images (or a batch of lists)

@@ -4,6 +4,7 @@ class PromptEngine:
     def __init__(self, output_dim):
         self.output_dim = output_dim
         # Here you could load a pre-trained prompt model or set up your prompt logic.
+        self.name = "genericPromptEngine"
 
     def __call__(self, pil_images):
         # For demonstration, assume each image is processed into a fixed-size feature vector.
