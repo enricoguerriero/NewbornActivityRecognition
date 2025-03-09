@@ -3,7 +3,6 @@ from utils import setup_all_loggers, select_model, wandb_session
 import logging
 from data.dataset import VideoDataset
 import os
-import wandb
 
 def main():
     
@@ -59,7 +58,7 @@ def main():
     if "test" in tasks:
         pass
     
-    if "untrained_test" in tasks:
+    if "test_untrained" in tasks:
         logger.info("...Testing the model without knowledge...")
         model.test_without_knowledge(test_loader, questions = None, wandb = wandb)
     

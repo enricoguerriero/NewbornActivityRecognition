@@ -16,15 +16,13 @@ class SmolVLMEngine(PromptEngine):
         if checkpoint_path:
             self.model = Idefics3ForConditionalGeneration.from_pretrained(
                 checkpoint_path,
-                torch_dtype=torch.bfloat16,
-                device_map=device
-            )
+                torch_dtype=torch.bfloat16
+            ).to(self.device)
         else:
             self.model = Idefics3ForConditionalGeneration.from_pretrained(
                 base_model_id,
-                torch_dtype=torch.bfloat16,
-                device_map=device 
-            )
+                torch_dtype=torch.bfloat16
+            ).to(self.device)
         
         # Adjust image processor settings.
         self.prompt_processor.image_processor.size = (384, 384)
@@ -88,6 +86,8 @@ class SmolVLMEngine(PromptEngine):
             # Move all inputs to the target device.
             inputs = {k: v.to(self.device) for k, v in inputs.items()}
             
+            print("Input device:", inputs.get("input_ids", "No input_ids").device, flush=True)
+            print("Model device:", next(self.model.parameters()).device, flush=True)
             # Generate answers using the model.
             outputs = self.model.generate(
                 **inputs,
