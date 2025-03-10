@@ -81,13 +81,8 @@ class SmolVLMEngine(PromptEngine):
                 text=prompt_text,
                 images=image_list,
                 return_tensors="pt"
-            )
+            ).to(self.device)
             
-            # Move all inputs to the target device.
-            inputs = {k: v.to(self.device) for k, v in inputs.items()}
-            
-            print("Input device:", inputs.get("input_ids", "No input_ids").device, flush=True)
-            print("Model device:", next(self.model.parameters()).device, flush=True)
             # Generate answers using the model.
             outputs = self.model.generate(
                 **inputs,

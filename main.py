@@ -53,7 +53,13 @@ def main():
         pass
     
     if "train" in tasks:
-        pass
+        logger.info("...Training the model...")
+        model.train(train_loader = train_loader, 
+                    optimizer = model.define_optimizer(CONFIG["optimizer"], CONFIG["learning_rate"], CONFIG["momentum"]),
+                    criterion = model.define_criterion(CONFIG["criterion"]),
+                    num_epochs = CONFIG["epochs"],
+                    validation_loader = validation_loader,
+                    wandb = wandb)
     
     if "test" in tasks:
         pass
