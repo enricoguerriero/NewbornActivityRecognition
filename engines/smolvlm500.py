@@ -96,7 +96,13 @@ class SmolVLM500Engine(PromptEngine):
             
             # Remove useless things from output
             final_answer = answer.split("Assistant:")[-1].strip()
-            final_answer = re.sub(r'\D', '', final_answer)
+            match = re.search(r'\b[01]\b', final_answer)
+            
+            if match:
+                final_answer = match.group()
+            else:
+                final_answer = None
+
             
             responses.append(final_answer)
         
