@@ -182,7 +182,7 @@ class BaseVideoModel(nn.Module):
         """
         frame_proc = self.transform(frame_rgb)
         if self.image_processor is not None:
-            frame_proc = self.image_processor(frame_proc)
+            frame_proc = self.image_processor(frame_proc, return_tensors="pt")["pixel_values"].squeeze()
         else:
             frame_proc = torch.tensor(np.array(frame_proc)).permute(2, 0, 1).float() / 255.0
         return frame_proc
