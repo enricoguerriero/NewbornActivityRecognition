@@ -42,6 +42,12 @@ def select_engine(engine_name):
     if engine_name == "smolvlm":
         from engines.smolvlm import SmolVLMEngine
         return SmolVLMEngine()
+    elif engine_name == "smolvlm256":
+        from engines.smolvlm256 import SmolVLM256Engine
+        return SmolVLM256Engine()
+    elif engine_name == "smolvlm500":
+        from engines.smolvlm500 import SmolVLM500Engine
+        return SmolVLM500Engine()
     else:
         raise ValueError(f"Engine {engine_name} not available")
     

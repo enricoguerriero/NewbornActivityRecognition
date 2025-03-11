@@ -1,28 +1,30 @@
 from transformers import AutoProcessor
-from transformers import Idefics3ForConditionalGeneration
+from transformers import AutoModelForImageTextToText
 from engines.prompt_engine import PromptEngine
 import torch
 import re
 
-class SmolVLMEngine(PromptEngine):
+class SmolVLM500Engine(PromptEngine):
     """
     A wrapper for the smolvlm model that encapsulates loading the processor and model,
     as well as generating answers from prompts.
     """
-    def __init__(self, checkpoint_path: str = None, base_model_id: str = "HuggingFaceTB/SmolVLM-Instruct", device=None):
+    def __init__(self, checkpoint_path: str = None, base_model_id: str = "HuggingFaceTB/SmolVLM2-500M-Video-Instruct", device=None):
         self.device = torch.device(device) if device else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         
         # Load the processor and model.
         self.prompt_processor = AutoProcessor.from_pretrained(base_model_id)
         if checkpoint_path:
-            self.model = Idefics3ForConditionalGeneration.from_pretrained(
+            self.model = AutoModelForImageTextToText.from_pretrained(
                 checkpoint_path,
-                torch_dtype=torch.bfloat16
+                torch_dtype=torch.bfloat16,
+                _attn_implementation="flash_attention_2",
             ).to(self.device)
         else:
-            self.model = Idefics3ForConditionalGeneration.from_pretrained(
+            self.model = AutoModelForImageTextToText.from_pretrained(
                 base_model_id,
-                torch_dtype=torch.bfloat16
+                torch_dtype=torch.bfloat16,
+                _attn_implementation="flash_attention_2",
             ).to(self.device)
         
         # Adjust image processor settings.
@@ -50,7 +52,7 @@ class SmolVLMEngine(PromptEngine):
         ]
         
         prompt = self.prompt_processor.apply_chat_template(prompt_template, add_generation_prompt=True)
-        
+    
         return prompt
     
 
@@ -87,12 +89,7 @@ class SmolVLMEngine(PromptEngine):
             # Generate answers using the model.
             outputs = self.model.generate(
                 **inputs,
-                max_new_tokens=50,
-                num_beams=5,
-                temperature=temperature,
-                do_sample=True,
-                use_cache=True
-            )
+                max_new_tokens=500)
             
             # Decode the generated output.
             answer = self.prompt_processor.decode(outputs[0], skip_special_tokens=True)
@@ -100,7 +97,7 @@ class SmolVLMEngine(PromptEngine):
             # Remove useless things from output
             final_answer = answer.split("Assistant:")[-1].strip()
             final_answer = re.sub(r'\D', '', final_answer)
-
+            
             responses.append(final_answer)
         
         return responses

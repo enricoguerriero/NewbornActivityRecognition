@@ -35,8 +35,6 @@ class TimesformerModel(BaseVideoModel):
         self.to(self.device)
         self.model_name = "timesformer"
         
-        self.input_type = "tensors"
-
     def forward(self, pixel_values):
         """
         Forward pass for the Timesformer model.

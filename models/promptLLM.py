@@ -4,8 +4,6 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 import torch
 import numpy as np
-import cv2
-import os
 from PIL import Image
 import logging
 
@@ -104,7 +102,7 @@ class PromptLLMModel(BaseVideoModel):
                     
                     # log details.
                     if logger is not None:
-                        logger.info(f"Predictions: {predictions}, Ground Truth: {gt_list}")
+                        logger.debug(f"Predictions: {predictions}, Ground Truth: {gt_list}")
                     if wandb is not None:
                         wandb.log({"predictions": predictions, "ground_truth": gt_list})
         

@@ -54,7 +54,7 @@ def main():
     
     if "train" in tasks:
         logger.info("...Training the model...")
-        model.train(train_loader = train_loader, 
+        model.train_model(train_loader = train_loader, 
                     optimizer = model.define_optimizer(CONFIG["optimizer"], CONFIG["learning_rate"], CONFIG["momentum"]),
                     criterion = model.define_criterion(CONFIG["criterion"]),
                     num_epochs = CONFIG["epochs"],

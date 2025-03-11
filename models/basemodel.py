@@ -12,7 +12,7 @@ class BaseVideoModel(nn.Module):
     An abstract base class for video models.
     Provides a common interface for training, inference, and last-layer modifications.
     """
-    def __init__(self, model_name: str = "baseModel"):
+    def __init__(self, device = "cuda", model_name: str = "baseModel"):
         super(BaseVideoModel, self).__init__()
         self.model_name = model_name
         self.video_folder = "data/videos"
@@ -20,6 +20,9 @@ class BaseVideoModel(nn.Module):
         self.output_folder = "data/processed/" + self.model_name
         self.transform = None
         self.image_processor = None
+        self.device = torch.device(device)
+        self.to(self.device)
+        self.threshold = 0.5  # threshold for multi-label classification
     
     def forward(self, x):
         raise NotImplementedError("Subclasses must implement the forward method.")
