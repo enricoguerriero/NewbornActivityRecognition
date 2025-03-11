@@ -1,7 +1,7 @@
 CONFIG = {
     # task
-    "task": ["preprocessing", "test_untrained"],
-    "model_name": "smolvlm",
+    "task": ["preprocessing", "train"],
+    "model_name": "timesformer",
     
     # data creation
     "clip_length": 2,
@@ -28,3 +28,4 @@ CONFIG = {
     # wandb
     "wandb_project": "newborn-activity-recognition",
 }
+

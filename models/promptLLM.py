@@ -6,6 +6,7 @@ import torch
 import numpy as np
 from PIL import Image
 import logging
+from tqdm import tqdm
 
 class PromptLLMModel(BaseVideoModel):
     def __init__(self, prompt_engine: PromptEngine, num_classes = 7):
@@ -63,7 +64,7 @@ class PromptLLMModel(BaseVideoModel):
         
         self.eval()
         with torch.no_grad():
-            for batch in dataloader:
+            for batch in tqdm(dataloader, desc="Testing", unit="batch"):
                 # Expect batch as a dict with keys 'frames' and 'labels'.
                 frames_batch = batch['frames']   # Shape: (batch_size, num_frames, channels, height, width)
                 labels_batch = batch['labels']     # Shape: (batch_size, num_questions)

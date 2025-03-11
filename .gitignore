@@ -6,3 +6,6 @@ logs/
 configList/
 slurm/
 outputs/
+wandb/
+__pycache__/
+config.py
