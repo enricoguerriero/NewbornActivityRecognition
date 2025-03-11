@@ -2,7 +2,6 @@ from transformers import AutoProcessor
 from transformers import Idefics3ForConditionalGeneration
 from engines.prompt_engine import PromptEngine
 import torch
-import re
 
 class SmolVLMEngine(PromptEngine):
     """
@@ -17,13 +16,15 @@ class SmolVLMEngine(PromptEngine):
         if checkpoint_path:
             self.model = Idefics3ForConditionalGeneration.from_pretrained(
                 checkpoint_path,
-                torch_dtype=torch.bfloat16
-            ).to(self.device)
+                torch_dtype=torch.bfloat16,
+                device_map=device
+            )
         else:
             self.model = Idefics3ForConditionalGeneration.from_pretrained(
                 base_model_id,
-                torch_dtype=torch.bfloat16
-            ).to(self.device)
+                torch_dtype=torch.bfloat16,
+                device_map=device 
+            )
         
         # Adjust image processor settings.
         self.prompt_processor.image_processor.size = (384, 384)
@@ -82,7 +83,9 @@ class SmolVLMEngine(PromptEngine):
                 text=prompt_text,
                 images=image_list,
                 return_tensors="pt"
-            ).to(self.device)
+            ).to(self.devic
+	    print("input: ", inputs, flush = True)
+	    print("input device: ", inputs.device, flush = True)
             
             # Generate answers using the model.
             outputs = self.model.generate(
@@ -96,17 +99,6 @@ class SmolVLMEngine(PromptEngine):
             
             # Decode the generated output.
             answer = self.prompt_processor.decode(outputs[0], skip_special_tokens=True)
-            
-            # Remove useless things from output
-            final_answer = answer.split("Assistant:")[-1].strip()
-            match = re.search(r'\b[01]\b', final_answer)
-            
-            if match:
-                final_answer = match.group()
-            else:
-                print(answer, flush = True)
-                final_answer = '2'
-
-            responses.append(final_answer)
+            responses.append(answer)
         
         return responses
