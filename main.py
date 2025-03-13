@@ -58,7 +58,7 @@ def main():
                     optimizer = model.define_optimizer(CONFIG["optimizer"], CONFIG["learning_rate"], CONFIG["momentum"]),
                     criterion = model.define_criterion(CONFIG["criterion"]),
                     num_epochs = CONFIG["epochs"],
-                    validation_loader = validation_loader,
+                    val_loader = validation_loader,
                     wandb = wandb)
     
     if "test" in tasks:

@@ -246,7 +246,11 @@ class BaseVideoModel(nn.Module):
 
         progress = tqdm(dataloader, desc=f"Epoch {epoch} [Train]", leave=False) if verbose else dataloader
 
-        for frames, labels in progress:
+        for batch in progress:
+            
+            frames = batch['frames']
+            labels = batch['labels']
+            
             frames = frames.to(self.device)
             # For multi-label tasks, labels should be a float tensor of shape (batch_size, num_event_classes)
             labels = labels.to(self.device).float()
@@ -289,7 +293,10 @@ class BaseVideoModel(nn.Module):
         total_correct = 0
 
         with torch.no_grad():
-            for frames, labels in dataloader:
+            for batch in dataloader:
+                frames = batch['frames']
+                labels = batch['labels']
+                
                 frames = frames.to(self.device)
                 labels = labels.to(self.device).float()
                 outputs = self.forward(frames)
