@@ -100,8 +100,12 @@ class SmolVLM256Engine(PromptEngine):
             
             if match:
                 final_answer = match.group()
+            elif final_answer.lower().startswith("yes"):
+                final_answer = "1"
+            elif final_answer.lower().startswith("no"):
+                final_answer = "0"
             else:
-                final_answer = None
+                final_answer = "2"
 
             responses.append(final_answer)
             
