@@ -106,7 +106,7 @@ class PromptLLMModel(BaseVideoModel):
                         logger.debug(f"Predictions: {predictions}, Ground Truth: {gt_list}")
                     if wandb is not None:
                         for idx, question in enumerate(questions):
-                            wandb.log({f"{question}_prediction": predictions[idx], f"{question}_gt": gt_list[idx]})
+                            wandb.log({f"{question}_prediction": float(predictions[idx]), f"{question}_gt": float(gt_list[idx])})
         
         # Compute accuracy per question.
         accuracies = {}
