@@ -26,6 +26,10 @@ def main():
     
     logger.debug(f'Configuration: {CONFIG}')
     
+    if "exploring" in tasks:
+        logger.info("...Exploring the data...")
+        pass        
+    
     if "preprocessing" in tasks:
         logger.info("...Preprocessing videos...")
         model.transform = model.define_transformation(CONFIG["target_size"]) 
@@ -54,23 +58,29 @@ def main():
     
     if "train" in tasks:
         logger.info("...Training the model...")
-        model.train_model(train_loader = train_loader, 
+        history = model.train_model(train_loader = train_loader, 
                     optimizer = model.define_optimizer(CONFIG["optimizer"], CONFIG["learning_rate"], CONFIG["momentum"]),
                     criterion = model.define_criterion(CONFIG["criterion"]),
                     num_epochs = CONFIG["epochs"],
                     val_loader = validation_loader,
                     wandb = wandb)
-    
+        logger.info(f"History: {history}")
+
     if "test" in tasks:
-        pass
-    
+        logger.info("...Testing the model...")
+        history = model.test(dataloader = test_loader,
+                   criterion = model.define_criterion(CONFIG["criterion"]), 
+                   wandb = wandb) 
+        logger.info(f"History: {history}")
+        
     if "test_untrained" in tasks:
         logger.info("...Testing the model without knowledge...")
-        model.test_without_knowledge(test_loader, questions = None, wandb = wandb)
-    
-    
+        history = model.test_without_knowledge(test_loader, questions = None, wandb = wandb)
+        logger.info(f"History: {history}")
+
+
     logger.info("...Exiting the main function...")
-    
+
 
 if __name__ == "__main__":
     main()

@@ -98,7 +98,7 @@ class VideoDataset(Dataset):
             codec (str): FourCC code for video codec (default 'mp4v').
         """
         os.makedirs(export_folder, exist_ok=True)
-        for pt_file in tqdm(self.clip_files):
+        for pt_file in tqdm(self.video_clips):
             clip_data = torch.load(pt_file, weights_only=True)
             frames = clip_data['frames']  # Tensor of shape [num_frames, C, H, W]
             # Convert frames to numpy array in HxWxC format.

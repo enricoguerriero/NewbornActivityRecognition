@@ -273,7 +273,7 @@ class BaseVideoModel(nn.Module):
         accuracy = 100 * total_correct / total_labels if total_labels > 0 else 0
         return avg_loss, accuracy
 
-    def test(self, dataloader, criterion, logger, wandb = None):
+    def test(self, dataloader, criterion, logger = None, wandb = None):
         """
         Evaluates the model on the test set.
         
@@ -285,6 +285,9 @@ class BaseVideoModel(nn.Module):
             avg_loss (float): Average test loss.
             accuracy (float): Average per-label accuracy percentage.
         """
+        if logger is None:
+            logger = logging.getLogger(f'{self.model_name}_test')
+        
         if logger and wandb:
             logger.debug("Evaluating model on test set...")
         self.eval()  
