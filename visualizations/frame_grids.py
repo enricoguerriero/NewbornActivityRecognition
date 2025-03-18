@@ -36,6 +36,6 @@ def generate_frame_grids(frames_dir, output_grid_dir, splits=["train", "validati
             print(f"Saved frame grid for video {video} in {split} at {output_file}")
 
 if __name__ == "__main__":
-    frames_dir = os.path.join("visualizations", "extracted_frames")
+    frames_dir = os.path.join("visualizations", "frames")
     output_grid_dir = os.path.join("visualizations", "frame_grids")
     generate_frame_grids(frames_dir, output_grid_dir)
