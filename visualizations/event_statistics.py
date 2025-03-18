@@ -90,3 +90,24 @@ for split in splits:
     plt.savefig(scatter_path)
     plt.close()
     print(f"Saved start time vs duration scatter plot for {split} at {scatter_path}")
+
+    # --------------------------------------------------------
+    # Plot 5: Scatter Plot of Start Time vs Duration for Each Video (in seconds)
+    # --------------------------------------------------------
+    video_ids = df["video_id"].unique()
+    for video in video_ids:
+        subset_video = df[df["video_id"] == video]
+        plt.figure(figsize=(10, 6))
+        event_types_video = subset_video["event_type"].unique()
+        for event in event_types_video:
+            subset_event = subset_video[subset_video["event_type"] == event]
+            plt.scatter(subset_event["start_sec"], subset_event["duration_sec"], label=event, alpha=0.7)
+        plt.title(f"Start Time vs Duration for Video {video} in {split.capitalize()} Split")
+        plt.xlabel("Start Time (sec)")
+        plt.ylabel("Duration (sec)")
+        plt.legend()
+        plt.tight_layout()
+        scatter_video_path = os.path.join(split_stats_dir, f"start_time_vs_duration_{video}.png")
+        plt.savefig(scatter_video_path)
+        plt.close()
+        print(f"Saved start time vs duration scatter plot for video {video} in {split} at {scatter_video_path}")
