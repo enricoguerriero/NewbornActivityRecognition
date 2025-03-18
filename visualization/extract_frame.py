@@ -39,7 +39,7 @@ for split in splits:
             print(f"Failed to open video: {video_path}")
             continue
         
-        # Attempt to retrieve the FPS; fallback to default if unavailable.
+        # Retrieve the FPS; fallback to default if unavailable.
         fps = cap.get(cv2.CAP_PROP_FPS)
         if fps == 0:
             fps = FPS_DEFAULT
@@ -51,21 +51,24 @@ for split in splits:
         # Get events for this video
         video_events = df[df["video_id"] == video_id]
         for idx, row in video_events.iterrows():
-            # Choose the event's start frame as the representative frame
-            start_frame = row["start_frame"]
+            # Here, we interpret 'start_frame' as the start time in ms
+            start_time_ms = row["start_frame"]
             event_type = row["event_type"].replace(" ", "_")
-            timestamp = start_frame / fps  # in seconds (optional use)
             
-            # Set the video to the specified frame position
-            cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
+            # Convert milliseconds to the corresponding frame index
+            frame_index = int(start_time_ms / 1000.0 * fps)
+            timestamp_sec = start_time_ms / 1000.0  # for optional logging
+            
+            # Set the video to the computed frame index
+            cap.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
             ret, frame = cap.read()
             if ret:
                 # Save the frame as a JPG image
-                output_filename = f"{event_type}_{start_frame}_frame.jpg"
+                output_filename = f"{event_type}_{frame_index}_frame.jpg"
                 output_path = os.path.join(video_output_dir, output_filename)
                 cv2.imwrite(output_path, frame)
-                print(f"Saved frame for video {video_id}: {output_path}")
+                print(f"Saved frame for video {video_id} at time {timestamp_sec:.2f}s (frame {frame_index}): {output_path}")
             else:
-                print(f"Failed to read frame at {start_frame} in video {video_id}")
+                print(f"Failed to read frame at time {timestamp_sec:.2f}s (frame {frame_index}) in video {video_id}")
         
         cap.release()
