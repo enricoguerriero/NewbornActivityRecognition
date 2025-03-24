@@ -19,7 +19,7 @@ def preprocess_videos(model_name: str, video_folder: str, annotation_folder: str
 
     video_folder = os.path.join(video_folder, set_name)
     annotation_folder = os.path.join(annotation_folder, set_name)
-    output_folder = os.path.join(output_folder, model_name, set_name, len(event_categories))
+    output_folder = os.path.join(output_folder, model_name, set_name, str(len(event_categories)))
     os.makedirs(output_folder, exist_ok=True)
     logger.info(f"Output folder: {output_folder}")
 

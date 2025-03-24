@@ -5,11 +5,12 @@ from data.dataset import VideoDataset
 import os
 import json
 from data.preprocess_data import preprocess_videos
+import torch
 
 def main():
     
     model_name = CONFIG["model_name"]
-    tasks = CONFIG["tasks"]
+    tasks = CONFIG["task"]
     
     setup_all_loggers(model_name, tasks)
     
@@ -40,7 +41,7 @@ def main():
         
     # train_data = VideoDataset(os.path.join(model.output_folder, "train")) if "train" in tasks else None
     # validation_data = VideoDataset(os.path.join(model.output_folder, "validation")) if "train" in tasks else None
-    test_data = VideoDataset(os.path.join(model.output_folder, "test")) if "test" or "untrained_test" in tasks else None
+    test_data = VideoDataset(os.path.join(model.output_folder, "test", "4")) if "test" or "untrained_test" in tasks else None
     
     # train_loader = train_data.get_data_loader(CONFIG["batch_size"], CONFIG["num_workers"]) if "train" in tasks else None
     # validation_loader = validation_data.get_data_loader(CONFIG["batch_size"], CONFIG["num_workers"]) if "train" in tasks else None
@@ -74,24 +75,23 @@ def main():
         #     }
         # the labels are saved in clip_labels
         # fill the file with the ground truth labels
-        for clip in os.listdir(os.path.join(model.output_folder, "test")):
-            clip_path = os.path.join(model.output_folder, "test", clip)
-            with open(os.path.join(clip_path), 'r') as f:
-                clip_data = json.load(f)
-                clip_labels = clip_data['labels']
-                clip_name = clip.split('.')[0]
-                with open('labels.json', 'r') as f:
-                    labels_data = json.load(f)
-                labels_data[clip_name] = {}
-                for i in range(len(clip_labels)):
-                    labels_data[clip_name][i] = {"ground_truth": clip_labels[i]}
-                with open('labels.json', 'w') as f:
-                    json.dump(labels_data, f)
+        for clip in os.listdir(os.path.join(model.output_folder, "test", "4")):
+            clip_path = os.path.join(model.output_folder, "test", "4", clip)
+            clip_data = torch.load(clip_path)
+            clip_labels = clip_data['labels']
+            clip_name = clip.split('.')[0]
+            with open('labels.json', 'r') as f:
+                labels_data = json.load(f)
+            labels_data[clip_name] = {}
+            for i in range(len(clip_labels)):
+                labels_data[clip_name][i] = {"ground_truth": clip_labels[i].tolist()}
+            with open('labels.json', 'w') as f:
+                json.dump(labels_data, f)
                 
         logger.info("...Labels file created...")
                 
     logger.info("...Testing the model without knowledge...")
-    history, new_labels = model.test_without_knowledge(test_loader, questions = None, wandb = wandb)
+    history, new_labels = model.test_without_knowledge(test_loader, questions = CONFIG['questions'], wandb = wandb)
     logger.info(f"History: {history}")
     
     if "labeling" in tasks:

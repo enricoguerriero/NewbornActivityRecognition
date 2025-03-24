@@ -72,13 +72,14 @@ class PromptLLMModel(BaseVideoModel):
                 # Expect batch as a dict with keys 'frames' and 'labels'.
                 frames_batch = batch['frames']   # Shape: (batch_size, num_frames, channels, height, width)
                 labels_batch = batch['labels']     # Shape: (batch_size, num_questions)
-                
+                clip_names = batch['clip_name']
+
                 batch_size = frames_batch.size(0)
                 for i in range(batch_size):
                     # Extract the frames for the current sample.
                     frames_tensor = frames_batch[i]  # Shape: (num_frames, channels, height, width)
-                    clip_name = batch[i]['clip_name']
-                    
+                    clip_name = clip_names[i]
+
                     # Convert each frame to a PIL image.
                     pil_images = []
                     for frame in frames_tensor:
