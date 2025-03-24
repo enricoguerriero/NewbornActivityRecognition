@@ -71,6 +71,7 @@ class SmolVLMEngine(PromptEngine):
         # Create a placeholder for each image as in your original design.
         image_tokens = [{"type": "image"} for _ in range(len(image_list))]
         responses = []
+        full_answers = []
         
         for question in questions:
             
@@ -108,5 +109,6 @@ class SmolVLMEngine(PromptEngine):
                 final_answer = '2'
 
             responses.append(final_answer)
+            full_answers.append(answer)
         
-        return responses
+        return responses, full_answers

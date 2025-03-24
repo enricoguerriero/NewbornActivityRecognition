@@ -61,7 +61,8 @@ class VideoDataset(Dataset):
             'clip_index': clip_data.get('clip_index', idx),
             'clip_start_time': clip_data.get('clip_start_time'),
             'clip_length': clip_data.get('clip_length'),
-            'sampling_rate': clip_data.get('sampling_rate')
+            'sampling_rate': clip_data.get('sampling_rate'),
+            'clip_name': os.path.basename(clip_path).split('.')[0]
         }
         return sample
 

@@ -19,6 +19,7 @@ class PromptLLMModel(BaseVideoModel):
         # A mapping layer that converts prompt output to desired classification logits.
         # self.mapping = nn.Linear(prompt_engine.output_dim, num_classes)
         self.model_name = prompt_engine.name
+        self.image_processor = None
     
     def forward(self, x):
         # x is expected to be a list of PIL images (or a batch of lists)
@@ -62,6 +63,9 @@ class PromptLLMModel(BaseVideoModel):
         # Initialize statistics for each question.
         topic_stats = {question: {'correct': 0, 'total': 0} for question in questions}
         
+        # predicted values to return
+        predicted_values = {}
+        
         self.eval()
         with torch.no_grad():
             for batch in tqdm(dataloader, desc="Testing", unit="batch"):
@@ -73,6 +77,7 @@ class PromptLLMModel(BaseVideoModel):
                 for i in range(batch_size):
                     # Extract the frames for the current sample.
                     frames_tensor = frames_batch[i]  # Shape: (num_frames, channels, height, width)
+                    clip_name = batch[i]['clip_name']
                     
                     # Convert each frame to a PIL image.
                     pil_images = []
@@ -90,8 +95,9 @@ class PromptLLMModel(BaseVideoModel):
                     gt_list = [str(int(val.item())) for val in gt_tensor]
                     
                     # Obtain predictions from the prompt engine.
-                    predictions = self.prompt_engine.answer_questions(pil_images, questions)
+                    predictions, full_answer = self.prompt_engine.answer_questions(pil_images, questions)
                     logger.debug(f"Predictions: {predictions}, Ground Truth: {gt_list}")
+                    predicted_values[clip_name] = full_answer
                     
                     # Update statistics for each question.
                     for idx, question in enumerate(questions):
@@ -119,4 +125,4 @@ class PromptLLMModel(BaseVideoModel):
             if wandb is not None:
                 wandb.log({f"{question}_accuracy": accuracies[question]})
         
-        return accuracies
+        return accuracies, predicted_values
