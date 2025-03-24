@@ -1,23 +1,17 @@
 import torch
-import numpy as np
 import re
 from transformers import VideoLlavaForConditionalGeneration, VideoLlavaProcessor
 from engines.prompt_engine import PromptEngine 
-from PIL import Image
 
-class VideoLlavaEngine(PromptEngine):
+class VideoLLamaEngine(PromptEngine):
     """
-    A wrapper for the VideoLlava model that encapsulates loading the processor and model,
-    as well as generating answers from video-based prompts.
-    
-    The answer_questions method accepts a list of PIL images (treated as consecutive video frames)
-    and a list of questions, and returns a list of generated answers.
+    A wrapper for the Video LLaVA model that encapsulates loading the processor and model,
+    as well as generating answers from prompts, with an interface similar to the SmolVLMEngine.
     """
     def __init__(self, checkpoint_path: str = None, base_model_id: str = "LanguageBind/Video-LLaVA-7B-hf", device=None):
-        # Set the device: use provided device, or default to cuda if available, else cpu.
         self.device = torch.device(device) if device else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         
-        # Load the processor and model.
+        # Load the processor and model
         self.processor = VideoLlavaProcessor.from_pretrained(base_model_id)
         if checkpoint_path:
             self.model = VideoLlavaForConditionalGeneration.from_pretrained(
@@ -32,48 +26,46 @@ class VideoLlavaEngine(PromptEngine):
                 device_map="auto"
             ).to(self.device)
         
-        # Set the model to evaluation mode.
         self.model.eval()
-        self.name = "video_llava"
+        self.name = "video_llama"
     
     def prompt_definition(self, question: str):
         """
-        Constructs the prompt string using the recommended VideoLLaVA format.
-        
-        The prompt format is:
-            "USER: <video>\n{question} ASSISTANT:"
+        Build the prompt text for a given question.
+        Here, we follow the recommended prompt format for Video LLaVA.
         """
-        return f"USER: <video>\n{question} ASSISTANT:"
+        # For example, the prompt is defined with a video token placeholder.
+        prompt = f"USER: <video>\n{question}\nASSISTANT:"
+        return prompt
     
-    def answer_questions(self, image_list: list, questions: list, seed: int = 42, temperature: float = 0.1):
+    def answer_questions(self, video_list: list, questions: list, seed: int = 42, temperature: float = 0.1):
         """
-        Given a list of PIL images (treated as consecutive video frames) and a list of questions,
-        generate answers for each question.
+        Given a list of videos (as numpy arrays) and a list of questions, generate answers.
         
-        :param image_list: List of PIL.Image instances.
+        :param video_list: List of video numpy arrays.
         :param questions: List of question strings.
         :param seed: Random seed for reproducibility.
         :param temperature: Sampling temperature.
-        :return: List of generated answers (one per question).
+        :return: Tuple (responses, full_answers) where:
+                 - responses is a list of post-processed final answers (extracted binary response: '0' or '1'),
+                 - full_answers is a list of the complete generated texts.
         """
         torch.manual_seed(seed)
-        responses = []
         
-        # Convert the list of PIL images into a numpy array of shape (num_frames, height, width, 3)
-        # which serves as the video input.
-        video = np.stack([np.array(img) for img in image_list], axis=0)
+        responses = []
+        full_answers = []
         
         for question in questions:
-            # Construct the prompt using the video-specific format.
+            # Create the prompt text using the given question.
             prompt_text = self.prompt_definition(question)
             
-            # Process inputs: both text and video.
-            inputs = self.processor(text=prompt_text, videos=video, return_tensors="pt").to(self.device)
+            # Process inputs (text and videos).
+            inputs = self.processor(text=prompt_text, videos=video_list, return_tensors="pt").to(self.device)
             
             # Generate answers using the model.
             outputs = self.model.generate(
                 **inputs,
-                max_new_tokens=60,
+                max_new_tokens=50,
                 num_beams=5,
                 temperature=temperature,
                 do_sample=True,
@@ -81,13 +73,23 @@ class VideoLlavaEngine(PromptEngine):
             )
             
             # Decode the generated output.
-            decoded_output = self.processor.batch_decode(
-                outputs, skip_special_tokens=True, clean_up_tokenization_spaces=True
-            )[0]
+            # Using batch_decode here so that it returns a list; we extract the first answer.
+            answer = self.processor.batch_decode(outputs, skip_special_tokens=True)[0]
             
-            # Extract the assistant's answer from the output.
-            final_answer = decoded_output.split("ASSISTANT:")[-1].strip()
-            
-            responses.append(final_answer)
+            # Post-process: Remove extra tokens and extract the binary answer (0 or 1).
+            final_answer = answer.split("ASSISTANT:")[-1].strip()
+            match = re.search(r'\b[01]\b', final_answer)
+            if match:
+                final_answer = match.group()
+            elif final_answer.lower().startswith("yes"):
+                final_answer = "1"
+            elif final_answer.lower().startswith("no"):
+                final_answer = "0"
+            else:
+                print(answer, flush=True)
+                final_answer = '2'
         
-        return responses
+            responses.append(final_answer)
+            full_answers.append(answer)
+        
+        return responses, full_answers
