@@ -61,7 +61,10 @@ class PromptLLMModel(BaseVideoModel):
             ]
         
         # Initialize statistics for each question.
-        topic_stats = {question: {'correct': 0, 'total': 0} for question in questions}
+        topic_stats = {
+            question: {'correct': 0, 'total': 0, 'TP': 0, 'TN': 0, 'FP': 0, 'FN': 0} 
+            for question in questions
+        }
         
         # predicted values to return
         predicted_values = {}
@@ -105,8 +108,20 @@ class PromptLLMModel(BaseVideoModel):
                         topic_stats[question]['total'] += 1
                         pred_str = predictions[idx].strip()
                         true_str = gt_list[idx].strip()
-                        if pred_str == true_str:
-                            topic_stats[question]['correct'] += 1
+                        
+                        # Update based on binary outcomes.
+                        if true_str == '1':
+                            if pred_str == '1':
+                                topic_stats[question]['TP'] += 1
+                                topic_stats[question]['correct'] += 1
+                            else:
+                                topic_stats[question]['FN'] += 1
+                        elif true_str == '0':
+                            if pred_str == '0':
+                                topic_stats[question]['TN'] += 1
+                                topic_stats[question]['correct'] += 1
+                            else:
+                                topic_stats[question]['FP'] += 1
                     
                     # log details.
                     if logger is not None:
@@ -116,14 +131,34 @@ class PromptLLMModel(BaseVideoModel):
                             wandb.log({f"{question}_prediction": float(predictions[idx]), f"{question}_gt": float(gt_list[idx])})
         
         # Compute accuracy per question.
-        accuracies = {}
+        metrics = {}
         for question, stats in topic_stats.items():
             total = stats['total']
-            correct = stats['correct']
-            accuracies[question] = correct / total if total > 0 else 0.0
+            TP = stats['TP']
+            TN = stats['TN']
+            FP = stats['FP']
+            FN = stats['FN']
+            accuracy = (TP + TN) / total if total > 0 else 0.0
+            precision = TP / (TP + FP) if (TP + FP) > 0 else 0.0
+            recall = TP / (TP + FN) if (TP + FN) > 0 else 0.0
+            f1 = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
+            metrics[question] = {
+                'accuracy': accuracy,
+                'precision': precision,
+                'recall': recall,
+                'f1': f1
+            }
             if logger is not None:
-                logger.info(f"Question: {question}, Accuracy: {accuracies[question]*100:.2f}%")
+                logger.info(
+                    f"Question: {question}, Accuracy: {accuracy*100:.2f}%, "
+                    f"Precision: {precision*100:.2f}%, Recall: {recall*100:.2f}%, F1: {f1*100:.2f}%"
+                )
             if wandb is not None:
-                wandb.log({f"{question}_accuracy": accuracies[question]})
-        
-        return accuracies, predicted_values
+                wandb.log({
+                    f"{question}_accuracy": accuracy,
+                    f"{question}_precision": precision,
+                    f"{question}_recall": recall,
+                    f"{question}_f1": f1
+                })
+            
+        return metrics, predicted_values
