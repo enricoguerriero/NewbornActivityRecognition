@@ -94,19 +94,18 @@ def main():
     history, new_labels = model.test_without_knowledge(test_loader, questions = CONFIG['questions'], wandb = wandb)
     logger.info(f"History: {history}")
     
-    if "labeling" in tasks:
-        logger.info("...Labeling the data...")
-        # open the file json in read mode
-        with open("labels.json", 'r') as f:
-            labels_data = json.load(f)
-        logger.info(f"Labels loaded: {labels_data}")
-        # add the new labels to the file json
-        for clip_name in new_labels.keys():
-            labels_data[clip_name][model_name] = new_labels[clip_name]
-        # save the file json
-        with open("labels.json", 'w') as f:
-            json.dump(labels_data, f)
-        logger.info("...Data labeled...")
+    logger.info("...Labeling the data...")
+    # open the file json in read mode
+    with open("labels.json", 'r') as f:
+        labels_data = json.load(f)
+    logger.info(f"Labels loaded: {labels_data}")
+    # add the new labels to the file json
+    for clip_name in new_labels.keys():
+        labels_data[clip_name][model_name] = new_labels[clip_name]
+    # save the file json
+    with open("labels.json", 'w') as f:
+        json.dump(labels_data, f)
+    logger.info("...Data labeled...")
 
 
     logger.info("...Exiting the main function...")
