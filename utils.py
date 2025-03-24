@@ -25,8 +25,7 @@ def setup_all_loggers(model_name: str, tasks: list):
     setup_logger(f'{model_name}_main', model_name)
     for task in tasks:
         setup_logger(f'{model_name}_{task}', model_name)
-        
-        
+              
 def select_model(model_name):
     """Function to select a model."""
     if model_name == "timesformer":
@@ -48,6 +47,9 @@ def select_engine(engine_name):
     elif engine_name == "smolvlm500":
         from engines.smolvlm500 import SmolVLM500Engine
         return SmolVLM500Engine()
+    elif engine_name == "llava_video":
+        from engines.llavavideo import VideoLLamaEngine
+        return VideoLLamaEngine()
     else:
         raise ValueError(f"Engine {engine_name} not available")
     
