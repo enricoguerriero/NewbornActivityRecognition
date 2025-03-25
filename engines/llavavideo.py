@@ -16,18 +16,16 @@ class VideoLLamaEngine(PromptEngine):
         if checkpoint_path:
             self.model = VideoLlavaForConditionalGeneration.from_pretrained(
                 checkpoint_path,
-                torch_dtype=torch.float16,
-                device_map="auto"
+                torch_dtype=torch.float16
             ).to(self.device)
         else:
             self.model = VideoLlavaForConditionalGeneration.from_pretrained(
                 base_model_id,
-                torch_dtype=torch.float16,
-                device_map="auto"
+                torch_dtype=torch.float16
             ).to(self.device)
         
         self.model.eval()
-        self.name = "video_llama"
+        self.name = "llava_video"
     
     def prompt_definition(self, question: str):
         """

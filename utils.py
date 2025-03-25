@@ -50,6 +50,9 @@ def select_engine(engine_name):
     elif engine_name == "llava_video":
         from engines.llavavideo import VideoLLamaEngine
         return VideoLLamaEngine()
+    elif engine_name == "janus7b":
+        from engines.janus7B import JanusProEngine
+        return JanusProEngine()
     else:
         raise ValueError(f"Engine {engine_name} not available")
     
