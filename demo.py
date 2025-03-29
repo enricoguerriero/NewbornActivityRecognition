@@ -115,3 +115,6 @@ def main():
     logger.info("Labels file updated with model predictions.")
     logger.info("Demo finished.")
     logger.info("--------------------------------")
+    
+if __name__ == "__main__":
+    main()
