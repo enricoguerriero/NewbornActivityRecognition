@@ -225,6 +225,10 @@ class VideoDataset(Dataset):
                 continue
             mapped_label = mapping.get(event_name)
             
+            if mapped_label is None:
+                print(f"Event {event_name} not in mapping, skipping.", flush=True)
+                continue
+            
             overlap = max(0, min(clip_end_ms, event_end) - max(clip_start_ms, event_start))
             proportion = overlap / (self.clip_length * 1000)
             
