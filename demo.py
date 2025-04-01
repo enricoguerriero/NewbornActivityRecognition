@@ -76,13 +76,12 @@ def main():
     logger.info(f"Subset DataLoader created with {len(subset_loader)} batches.")
     
     # structure of the json:
-    # {
-    #     "clip_number": {
+    # [
+    #     clip_number: {
     #         "ground_truth": "label",
     #         "model_name": "predicted_label",
-    #         ...},
-    #     ...}
-    # }
+    #     ...},
+    # ...]
     if not os.path.exists("demo_labels.json"):
         with open("demo_labels.json", "w") as f:
             json.dump({}, f)
