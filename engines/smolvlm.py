@@ -40,6 +40,13 @@ class SmolVLMEngine(PromptEngine):
         
         prompt_template = [
             {
+                "role": "system",
+                "content": [
+                    {"type": "text", "text": "You are a helpful assistant."},
+                    {"type": "text", "text": "Answer the question based on the images."}
+                ]
+            },
+            {
                 "role": "user",
                 "content": [
                     {"type": "text", "text": "Answer using just 0 or 1 following the instruction."},
