@@ -106,10 +106,11 @@ class SmolVLMEngine(PromptEngine):
             
             # Remove useless things from output
             final_answer = answer.split("Assistant:")[-1].strip()
-            match = re.search(r'\b[01]\b', final_answer)
-            
-            if match:
-                final_answer = match.group()
+
+            if final_answer.lower().startswith("yes"):
+                final_answer = '1'
+            elif final_answer.lower().startswith("no"):
+                final_answer = '0'
             else:
                 print(answer, flush = True)
                 final_answer = '2'

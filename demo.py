@@ -104,6 +104,7 @@ def main():
     history, new_labels = model.test_without_knowledge(subset_loader, questions=QUESTIONS, wandb=None)
     logger.info(f"History: {history}")
     logger.info(f"New labels: {new_labels}")
+    logger.info(f"Labels: {labels}")
     
     # update labels with new labels
     for i, clip in enumerate(clip_subset):
