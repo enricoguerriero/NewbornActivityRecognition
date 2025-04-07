@@ -90,7 +90,7 @@ def main():
         for i, clip in enumerate(clip_subset):
             label = clip['labels']
             clip_number = i   
-            labels[clip_number] = {}
+            labels.append({})
             labels[clip_number]["ground_truth"] = label.tolist()
         with open("demo_labels.json", "w") as f:
             json.dump(labels, f)
