@@ -86,7 +86,7 @@ def main():
         with open("demo_labels.json", "w") as f:
             json.dump({}, f)
         logger.info("Labels file created.")
-        labels = {}
+        labels = []
         for i, clip in enumerate(clip_subset):
             label = clip['labels']
             clip_number = i   
