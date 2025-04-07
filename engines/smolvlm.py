@@ -42,14 +42,13 @@ class SmolVLMEngine(PromptEngine):
             {
                 "role": "system",
                 "content": [
-                    {"type": "text", "text": "You are a helpful assistant."},
-                    {"type": "text", "text": "Answer the question based on the images."}
+                    {"type": "text", "text": "This is a simulation of a medical context. The camera is over a table, focusing on a doll that is intended to represent a baby. The doll is supposed to be receiving different medical treatments. Your task is to recognize the treatments that the doll is receiving. The treatments are: ventilation, stimulation, and suction. You will be asked questions about the doll's condition."},
                 ]
             },
             {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": "Answer using just 0 or 1 following the instruction."},
+                    {"type": "text", "text": "Please start your answer with explicitly 'Yes' or 'No', then explain the answer and describe the scene."},
                     *image_tokens,
                     {"type": "text", "text": question}
                 ]
