@@ -109,7 +109,7 @@ def main():
     # update labels with new labels
     for i, clip in enumerate(clip_subset):
         clip_number = i
-        labels[clip_number]["model_name"] = new_labels[clip["clip_name"]]
+        labels[clip_number][model_name] = new_labels[clip["clip_name"]]
     with open("demo_labels.json", "w") as f:
         json.dump(labels, f)
     logger.info("Labels file updated with model predictions.")
