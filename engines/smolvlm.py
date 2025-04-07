@@ -60,7 +60,7 @@ class SmolVLMEngine(PromptEngine):
         return prompt
     
 
-    def answer_questions(self, image_list: list, questions: list, seed: int = 42, temperature: float = 0.1):
+    def answer_questions(self, image_list: list, questions: list, seed: int = 42, temperature: float = 0.2):
         """
         Given a list of PIL images and a list of questions, generate answers.
         This method mimics your original answer_questions routine.

@@ -84,14 +84,14 @@ def main():
     # ...]
     if not os.path.exists("demo_labels.json"):
         with open("demo_labels.json", "w") as f:
-            json.dump({}, f)
+            json.dump([], f)
         logger.info("Labels file created.")
         labels = []
         for i, clip in enumerate(clip_subset):
             label = clip['labels']
-            clip_number = i   
-            labels.append({})
-            labels[clip_number]["ground_truth"] = label.tolist()
+            labels.append({
+                "ground_truth": label.tolist()
+            })
         with open("demo_labels.json", "w") as f:
             json.dump(labels, f)
         logger.info("Labels file filled with ground truth labels.")
