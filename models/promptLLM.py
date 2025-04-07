@@ -162,3 +162,44 @@ class PromptLLMModel(BaseVideoModel):
                 })
             
         return metrics, predicted_values
+
+
+    def describe_without_training(self, dataloader: DataLoader, wandb=None):
+        """
+        Describe the scene without training the model.
+        
+        :param dataloader: DataLoader yielding video clip samples.
+        :param wandb: Optional wandb instance for logging.
+        :return: List of descriptions for each clip.
+        """
+        logger = logging.getLogger(f'{self.model_name}_describe')
+        
+        descriptions = []
+        
+        self.eval()
+        with torch.no_grad():
+            for batch in tqdm(dataloader, desc="Describing", unit="batch"):
+                # Expect batch as a dict with keys 'frames' and 'labels'.
+                frames_batch = batch['frames']
+                clip_names = batch['clip_name']
+                batch_size = frames_batch.size(0)
+                for i in range(batch_size):
+                    # Extract the frames for the current sample.
+                    frames_tensor = frames_batch[i]
+                    clip_name = clip_names[i]
+                    # Convert each frame to a PIL image.
+                    pil_images = []
+                    for frame in frames_tensor:
+                        # Convert tensor to numpy array. Permute to (H, W, C) and cast to uint8.
+                        np_frame = frame.permute(1, 2, 0).cpu().numpy()
+                        # If the frame is not already in uint8, scale/clip accordingly.
+                        if np_frame.dtype != np.uint8:
+                            np_frame = (255 * np.clip(np_frame, 0, 1)).astype(np.uint8)
+                        pil_images.append(Image.fromarray(np_frame))
+                    # Obtain description from the prompt engine.
+                    description = self.prompt_engine.describe_the_scene(pil_images)
+                    descriptions.append(description)
+                    logger.debug(f"Description: {description}")
+                    if wandb is not None:
+                        wandb.log({f"{clip_name}_description": description})
+        return descriptions

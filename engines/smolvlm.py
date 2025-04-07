@@ -105,17 +105,68 @@ class SmolVLMEngine(PromptEngine):
             answer = self.prompt_processor.decode(outputs[0], skip_special_tokens=True)
             
             # Remove useless things from output
-            final_answer = answer.split("Assistant:")[-1].strip()
+            clean_answer = answer.split("Assistant:")[-1].strip()
 
-            if final_answer.lower().startswith("yes"):
+            if clean_answer.lower().startswith("yes"):
                 final_answer = '1'
-            elif final_answer.lower().startswith("no"):
+            elif clean_answer.lower().startswith("no"):
                 final_answer = '0'
             else:
                 print(answer, flush = True)
                 final_answer = '2'
 
             responses.append(final_answer)
-            full_answers.append(answer)
+            full_answers.append(clean_answer)
         
         return responses, full_answers
+    
+    
+    def describe_the_scene(self, image_list: list):
+        """
+        Given a list of PIL images, generate a description of the scene.
+        
+        :param image_list: List of PIL.Image instances.
+        :return: Description of the scene.
+        """
+        
+        image_tokens = [{"type": "image"} for _ in range(len(image_list))]
+        prompt_template = [
+            {
+                "role": "system",
+                "content": [
+                    {"type": "text", "text": "This is a simulation of a medical context. The camera is over a table, focusing on a doll that is intended to represent a baby. The doll is supposed to be receiving different medical treatments. Your task is to describe the scene. You need to identify the doll and its surroundings (if the doll is visible). Then, look at the doll's face. Identify if there is a mask on the doll's face. If there is a mask, identify if it is a CPAP or a PPV mask. If there is no mask, identify if there is a tube in the mouth of the doll. If there is a tube, identify if it is being used for suction. If there is no tube, identify if the doll is receiving stimulation on the back/nates, on the trunk or on the extremities. Describe any other relevant details."},
+                ]
+            },
+            {
+                "role": "user",
+                "content": [
+                    *image_tokens,
+                    {"type": "text", "text": "Please describe the scene and the actions and events that occur during the clip."}
+                ]
+            }
+        ]
+        
+        prompt = self.prompt_processor.apply_chat_template(prompt_template, add_generation_prompt=True)
+        
+        # Process inputs (both text and images).
+        inputs = self.prompt_processor(
+            text=prompt,
+            images=image_list,
+            return_tensors="pt"
+        ).to(self.device)
+        
+        # Generate the description using the model.
+        outputs = self.model.generate(
+            **inputs,
+            max_new_tokens=50,
+            num_beams=5,
+            temperature=0.2,
+            do_sample=True,
+            use_cache=True
+        )
+        
+        # Decode the generated output.
+        description = self.prompt_processor.decode(outputs[0], skip_special_tokens=True)
+        
+        return description.split("Assistant:")[-1].strip()
+

@@ -78,8 +78,8 @@ def main():
     # structure of the json:
     # [
     #     clip_number: {
-    #         "ground_truth": "label",
-    #         "model_name": "predicted_label",
+    #         "ground_truth": labels,
+    #         model_name: predicted_labels,
     #     ...},
     # ...]
     if not os.path.exists("demo_labels.json"):
@@ -100,11 +100,25 @@ def main():
             labels = json.load(f)
         logger.info("Labels loaded.")
         
+    if not os.path.exists("demo_descriptions.json"):
+        with open("demo_descriptions.json", "w") as f:
+            json.dump([], f)
+        logger.info("Descriptions file created.")
+        descriptions =[]
+    else:
+        with open("demo_descriptions.json", "r") as f:
+            descriptions = json.load(f)
+        logger.info("Descriptions loaded.")
+        
     logger.info("Starting the demo...")
     history, new_labels = model.test_without_knowledge(subset_loader, questions=QUESTIONS, wandb=None)
     logger.info(f"History: {history}")
     logger.info(f"New labels: {new_labels}")
     logger.info(f"Labels: {labels}")
+    
+    logger.info("Asking for model descriptions...")
+    new_descriptions = model.describe_the_scene(subset_loader)
+    logger.info(f"Descriptions: {new_descriptions}")
     
     # update labels with new labels
     for i, clip in enumerate(clip_subset):
@@ -113,6 +127,12 @@ def main():
     with open("demo_labels.json", "w") as f:
         json.dump(labels, f)
     logger.info("Labels file updated with model predictions.")
+    for i, clip in enumerate(clip_subset):
+        clip_number = i
+        descriptions[clip_number][model_name] = new_descriptions[clip["clip_name"]]
+    with open("demo_descriptions.json", "w") as f:
+        json.dump(descriptions, f)
+    logger.info("Descriptions file updated with model predictions.")
     logger.info("Demo finished.")
     logger.info("--------------------------------")
     
