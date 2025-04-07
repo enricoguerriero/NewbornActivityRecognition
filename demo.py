@@ -117,7 +117,7 @@ def main():
     logger.info(f"Labels: {labels}")
     
     logger.info("Asking for model descriptions...")
-    new_descriptions = model.describe_the_scene(subset_loader)
+    new_descriptions = model.describe_without_training(subset_loader)
     logger.info(f"Descriptions: {new_descriptions}")
     
     # update labels with new labels
