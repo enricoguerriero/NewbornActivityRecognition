@@ -129,7 +129,7 @@ def main():
     logger.info("Labels file updated with model predictions.")
     for i, clip in enumerate(clip_subset):
         clip_number = i
-        descriptions[clip_number][model_name] = new_descriptions[clip["clip_name"]]
+        descriptions[clip_number][model_name] = new_descriptions[clip_number]
     with open("demo_descriptions.json", "w") as f:
         json.dump(descriptions, f)
     logger.info("Descriptions file updated with model predictions.")
