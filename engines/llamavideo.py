@@ -27,27 +27,14 @@ class VideoLLamaEngine(PromptEngine):
         self.model.eval()
         self.name = "llama_video"
     
-    def prompt_definition(self, question: str, image_tokens: list):
+    def prompt_definition(self, question: str):
         """
         Build the prompt text for a given question.
         Here, we follow the recommended prompt format for Video LLaVA.
         """
-        prompt = [
-            {
-                "role": "system",
-                "content": [
-                    {"type": "text", "text": "This is a simulation of a medical context. The camera is over a table, focusing on a doll that is intended to represent a baby. The doll is supposed to be receiving different medical treatments. Your task is to recognize the treatments that the doll is receiving. The treatments are: ventilation, stimulation, and suction. You will be asked questions about the doll's condition."},
-                ]
-            },
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": "Please start your answer with explicitly 'Yes' or 'No', then explain the answer and describe the scene."},
-                    *image_tokens,
-                    {"type": "text", "text": question}
-                ]
-            }
-        ]
+        prompt = ("USER: <video>\n"
+                 f"Please start your answer with explicitly 'Yes' or 'No', then explain the answer and describe the scene.{question}\n"
+                 "ASSISTANT:")
         
         return prompt
     
@@ -68,11 +55,9 @@ class VideoLLamaEngine(PromptEngine):
         responses = []
         full_answers = []
         
-        image_tokens = [{"type": "image"} for _ in range(len(video_list))]
-        
         for question in questions:
             # Create the prompt text using the given question.
-            prompt_text = self.prompt_definition(question, image_tokens)
+            prompt_text = self.prompt_definition(question)
             
             # Process inputs (text and videos).
             inputs = self.prompt_processor(text=prompt_text, videos=video_list, return_tensors="pt").to(self.device)
@@ -122,25 +107,12 @@ class VideoLLamaEngine(PromptEngine):
         torch.manual_seed(seed)
         
         # Define a prompt for scene description.
-        image_tokens = [{"type": "image"} for _ in range(len(video_list))]
-        prompt_text = [
-            {
-                "role": "system",
-                "content": [
-                    {"type": "text", "text": "This is a simulation of a medical context. The camera is over a table, focusing on a doll that is intended to represent a baby. The doll is supposed to be receiving different medical treatments. Your task is to describe the scene. You need to identify the doll and its surroundings (if the doll is visible). Then, look at the doll's face. Identify if there is a mask on the doll's face. If there is a mask, identify if it is a CPAP or a PPV mask. If there is no mask, identify if there is a tube in the mouth of the doll. If there is a tube, identify if it is being used for suction. If there is no tube, identify if the doll is receiving stimulation on the back/nates, on the trunk or on the extremities. Describe any other relevant details."},
-                ]
-            },
-            {
-                "role": "user",
-                "content": [
-                    *image_tokens,
-                    {"type": "text", "text": "Please describe the scene and the actions and events that occur during the clip."}
-                ]
-            }
-        ]
-        
-        # Process inputs (text and videos)
-        inputs = self.prompt_processor(text=prompt_text, videos=video_list, return_tensors="pt").to(self.device)
+        prompt_text = ("USER: <video>\n"
+                       "Please describe the scene in detail. Include the context, any actions or events, "
+                       "and all observable details from the video.\n"
+                       "ASSISTANT:")
+ 
+        inputs = self.processor(text=prompt_text, videos=video_list, return_tensors="pt").to(self.device)
         
         # Generate the scene description using the model.
         outputs = self.model.generate(
