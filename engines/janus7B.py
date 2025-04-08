@@ -36,10 +36,13 @@ class JanusProEngine:
         """
         Define the prompt structure for a question.
         """
+        
+        context = "This is a simulation of a medical context. The camera is over a table, focusing on a doll that is intended to represent a baby. The doll is supposed to be receiving different medical treatments. Your task is to recognize the treatments that the doll is receiving. The treatments are: ventilation, stimulation, and suction. You will be asked questions about the doll's condition."
+        
         conversation = [
             {
                 "role": "<|User|>",
-                "content": f"<image_placeholder>\n{question}",
+                "content": f"{context}<image_placeholder>\n{question}",
                 "images": [image],
             },
             {
@@ -135,8 +138,7 @@ class JanusProEngine:
         conversation = [
             {
                 "role": "<|User|>",
-                "content": ("Please describe the scene and all observable details, including context, "
-                            "objects, and any activities taking place. Provide a detailed description of the environment."),
+                "content": ("This is a simulation of a medical context. The camera is over a table, focusing on a doll that is intended to represent a baby. The doll is supposed to be receiving different medical treatments. Your task is to describe the scene. You need to identify the doll and its surroundings (if the doll is visible). Then, look at the doll's face. Identify if there is a mask on the doll's face. If there is a mask, identify if it is a CPAP or a PPV mask. If there is no mask, identify if there is a tube in the mouth of the doll. If there is a tube, identify if it is being used for suction. If there is no tube, identify if the doll is receiving stimulation on the back/nates, on the trunk or on the extremities. Describe any other relevant details. Please describe the scene and the actions and events that occur during the clip."),
                 "images": [image],
             },
             {
