@@ -53,6 +53,9 @@ def select_engine(engine_name):
     elif engine_name == "janus7b":
         from engines.janus7B import JanusProEngine
         return JanusProEngine()
+    elif engine_name == "valley":
+        from engines.valley import ValleyEngine
+        return ValleyEngine()
     else:
         raise ValueError(f"Engine {engine_name} not available")
     
