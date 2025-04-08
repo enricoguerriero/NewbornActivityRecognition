@@ -50,7 +50,7 @@ class JanusProEngine:
         torch.manual_seed(seed)
         
         # take the first image from the list
-        image = Image.fromarray(image_list[len(image_list) // 2])
+        image = image_list[len(image_list) // 2]
         responses = []
         full_answers = []
         
