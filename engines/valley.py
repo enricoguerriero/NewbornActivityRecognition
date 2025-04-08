@@ -18,12 +18,14 @@ class ValleyEngine(PromptEngine):
         if checkpoint_path:
             self.model = AutoModelForVision2Seq.from_pretrained(
                 checkpoint_path,
-                torch_dtype=torch.bfloat16
+                torch_dtype=torch.bfloat16,
+                trust_remote_code=True
             ).to(self.device)
         else:
             self.model = AutoModelForVision2Seq.from_pretrained(
                 base_model_id,
-                torch_dtype=torch.bfloat16
+                torch_dtype=torch.bfloat16,
+                trust_remote_code=True
             ).to(self.device)
         
         # Adjust image processor settings for consistent input dimensions.
