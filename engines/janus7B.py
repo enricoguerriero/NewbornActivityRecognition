@@ -39,7 +39,7 @@ class JanusProEngine:
         torch.manual_seed(seed)
         
         # take the first image from the list
-        image = Image.fromarray(image_list[0])
+        image = Image.fromarray(image_list[len(image_list) // 2])
         
         # Define the prompt for the current question
         prompt_text = self.prompt_definition(question)
@@ -63,11 +63,8 @@ class JanusProEngine:
         
         # Extract the final answer
         final_answer = answer.split("Assistant:")[-1].strip()
-        match = re.search(r'\b[01]\b', final_answer)
         
-        if match:
-            final_answer = match.group()
-        elif final_answer.lower().startswith("yes"):
+        if final_answer.lower().startswith("yes"):
             final_answer = "1"
         elif final_answer.lower().startswith("no"):
             final_answer = "0"
