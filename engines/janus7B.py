@@ -1,5 +1,5 @@
-from transformers import AutoModelForCausalLM
-from janus.models import MultiModalityCausalLM, VLChatProcessor
+from transformers import AutoModelForCausalLM, AutoConfig
+from janus.models import VLChatProcessor
 import torch
 from PIL import Image
 import re
@@ -13,15 +13,17 @@ class JanusProEngine:
     def __init__(self, model_id: str = "deepseek-ai/Janus-Pro-7B", device: str = None):
         self.device = torch.device(device if device else ('cuda' if torch.cuda.is_available() else 'cpu'))
         
-        # Load the processor and model
-        self.vl_chat_processor = VLChatProcessor.from_pretrained(model_id)
-        self.tokenizer = self.vl_chat_processor.tokenizer
+        config = AutoConfig.from_pretrained(model_id)
+        language_config = config.language_config
+        language_config._attn_implementation = 'eager'
+        
         self.model = AutoModelForCausalLM.from_pretrained(
-            model_id, 
-            trust_remote_code=True,
-            torch_dtype=torch.float16,
-            device_map="auto"
+            model_id,
+            language_config=language_config,
+            trust_remote_code=True
         ).to(self.device)
+        
+        self.processor = VLChatProcessor.from_pretrained(model_id)
         
         # Set the model to evaluation mode
         self.model.eval()
@@ -32,23 +34,16 @@ class JanusProEngine:
         """
         Define the prompt structure for the model.
         """
-        # conversation = [
-        #     {
-        #         "role": "<|User|>",
-        #         "content": f"<image_placeholder>\n {question}",
-        #         "images": [image],
-        #     },
-        #     {"role": "<|Assistant|>", "content": ""},
-        # ]
+       
         conversation = [
             {
-                "role": "user",
+                "role": "<|User|>",
                 "content": f"<image_placeholder>\n{question}",
                 "images": [image],
             },
             {
-                "role": "assistant",
-                "content": "",
+                "role": "<|Assistant|>",
+                "content": ""
             },
         ]
 
@@ -59,6 +54,7 @@ class JanusProEngine:
         Given a PIL image and a question, generate an answer.
         """
         torch.manual_seed(seed)
+        top_p = 0.95 # TO TUNE!
         
         # take the first image from the list
         image = image_list[len(image_list) // 2]
@@ -68,24 +64,29 @@ class JanusProEngine:
         for question in questions:
         
             # Define the prompt for the current question
-            prompt_text = self.prompt_definition(question, image)
-            print(prompt_text, flush=True)
+            conversation = self.prompt_definition(question, image)
             
-            # Process inputs (both text and image)
-            inputs = self.vl_chat_processor(
-                conversation=prompt_text,
-                return_tensors="pt"
-            ).to(self.device)
+            prepare_inputs = self.processor(conversations=conversation, images=[image], force_batchify=True).to(self.device)
+            prepare_inputs['pixel_values'] = prepare_inputs['pixel_values'].to(torch.float32)
+            
+            inputs_embeds = self.model.prepare_inputs_embeds(**prepare_inputs)
             
             # Generate answer using the model
-            outputs = self.model.generate(
-                **inputs,
-                max_new_tokens=500,
-                temperature=temperature
+            outputs = self.model.language_model.generate(
+                inputs_embeds=inputs_embeds,
+                attention_mask=prepare_inputs.attention_mask,
+                pad_token_id=self.processor.tokenizer.eos_token_id,
+                bos_token_id=self.processor.tokenizer.bos_token_id,
+                eos_token_id=self.processor.tokenizer.eos_token_id,
+                max_new_tokens=512,
+                do_sample=temperature > 0,
+                use_cache=True,
+                temperature=temperature,
+                top_p=top_p,
             )
             
             # Decode the generated output
-            answer = self.processor.decode(outputs[0], skip_special_tokens=True)
+            answer = self.processor.tokenizer.decode(outputs[0].cpu().tolist(), skip_special_tokens=True)
             
             # Extract the final answer
             final_answer = answer.split("Assistant:")[-1].strip()
