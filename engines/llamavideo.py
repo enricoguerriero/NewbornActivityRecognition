@@ -122,13 +122,25 @@ class VideoLLamaEngine(PromptEngine):
         torch.manual_seed(seed)
         
         # Define a prompt for scene description.
-        prompt_text = ("USER: <video>\n"
-                       "Please describe the scene in detail. Include the context, any actions or events, "
-                       "and all observable details from the video.\n"
-                       "ASSISTANT:")
+        image_tokens = [{"type": "image"} for _ in range(len(video_list))]
+        prompt_text = [
+            {
+                "role": "system",
+                "content": [
+                    {"type": "text", "text": "This is a simulation of a medical context. The camera is over a table, focusing on a doll that is intended to represent a baby. The doll is supposed to be receiving different medical treatments. Your task is to describe the scene. You need to identify the doll and its surroundings (if the doll is visible). Then, look at the doll's face. Identify if there is a mask on the doll's face. If there is a mask, identify if it is a CPAP or a PPV mask. If there is no mask, identify if there is a tube in the mouth of the doll. If there is a tube, identify if it is being used for suction. If there is no tube, identify if the doll is receiving stimulation on the back/nates, on the trunk or on the extremities. Describe any other relevant details."},
+                ]
+            },
+            {
+                "role": "user",
+                "content": [
+                    *image_tokens,
+                    {"type": "text", "text": "Please describe the scene and the actions and events that occur during the clip."}
+                ]
+            }
+        ]
         
         # Process inputs (text and videos)
-        inputs = self.processor(text=prompt_text, videos=video_list, return_tensors="pt").to(self.device)
+        inputs = self.prompt_processor(text=prompt_text, videos=video_list, return_tensors="pt").to(self.device)
         
         # Generate the scene description using the model.
         outputs = self.model.generate(
