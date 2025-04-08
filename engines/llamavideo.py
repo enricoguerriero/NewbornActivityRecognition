@@ -74,7 +74,7 @@ class VideoLLamaEngine(PromptEngine):
             
             # Decode the generated output.
             # Using batch_decode here so that it returns a list; we extract the first answer.
-            answer = self.processor.batch_decode(outputs, skip_special_tokens=True)[0]
+            answer = self.prompt_processor.batch_decode(outputs, skip_special_tokens=True)[0]
             
             # Post-process: Remove extra tokens and extract the binary answer (0 or 1).
             final_answer = answer.split("ASSISTANT:")[-1].strip()
@@ -112,7 +112,7 @@ class VideoLLamaEngine(PromptEngine):
                        "and all observable details from the video.\n"
                        "ASSISTANT:")
  
-        inputs = self.processor(text=prompt_text, videos=video_list, return_tensors="pt").to(self.device)
+        inputs = self.prompt_processor(text=prompt_text, videos=video_list, return_tensors="pt").to(self.device)
         
         # Generate the scene description using the model.
         outputs = self.model.generate(
@@ -125,7 +125,7 @@ class VideoLLamaEngine(PromptEngine):
         )
         
         # Decode the generated output.
-        description = self.processor.batch_decode(outputs, skip_special_tokens=True)[0]
+        description = self.prompt_processor.batch_decode(outputs, skip_special_tokens=True)[0]
         # Extract the description after the "ASSISTANT:" token.
         description = description.split("ASSISTANT:")[-1].strip()
         
