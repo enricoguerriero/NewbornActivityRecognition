@@ -1,4 +1,4 @@
-from transformers import AutoProcessor, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 from PIL import Image
 import re
@@ -9,11 +9,11 @@ class JanusProEngine:
     A wrapper for the Janus-Pro model that encapsulates loading the processor and model,
     as well as generating answers from prompts.
     """
-    def __init__(self, model_id: str = "deepseek-ai/Janus-Pro-7B", device: str = None):
+    def __init__(self, model_id: str = "deepseek/janus-pro-7b", device: str = None):
         self.device = torch.device(device if device else ('cuda' if torch.cuda.is_available() else 'cpu'))
         
         # Load the processor and model
-        self.processor = AutoProcessor.from_pretrained(model_id)
+        self.processor = AutoTokenizer.from_pretrained(model_id)
         self.model = AutoModelForCausalLM.from_pretrained(
             model_id,
             torch_dtype=torch.float16,
@@ -42,7 +42,8 @@ class JanusProEngine:
         image = Image.fromarray(image_list[len(image_list) // 2])
         
         # Define the prompt for the current question
-        prompt_text = self.prompt_definition(question)
+        # prompt_text = self.prompt_definition(question)
+        prompt_text = question
         
         # Process inputs (both text and image)
         inputs = self.processor(

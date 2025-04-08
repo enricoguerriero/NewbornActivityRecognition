@@ -25,7 +25,7 @@ class VideoLLamaEngine(PromptEngine):
             ).to(self.device)
         
         self.model.eval()
-        self.name = "llava_video"
+        self.name = "llama_video"
     
     def prompt_definition(self, question: str):
         """

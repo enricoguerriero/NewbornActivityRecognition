@@ -47,8 +47,8 @@ def select_engine(engine_name):
     elif engine_name == "smolvlm500":
         from engines.smolvlm500 import SmolVLM500Engine
         return SmolVLM500Engine()
-    elif engine_name == "llava_video":
-        from engines.llavavideo import VideoLLamaEngine
+    elif engine_name == "llama_video":
+        from engines.llamavideo import VideoLLamaEngine
         return VideoLLamaEngine()
     elif engine_name == "janus7b":
         from engines.janus7B import JanusProEngine
