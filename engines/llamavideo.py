@@ -27,13 +27,29 @@ class VideoLLamaEngine(PromptEngine):
         self.model.eval()
         self.name = "llama_video"
     
-    def prompt_definition(self, question: str):
+    def prompt_definition(self, question: str, image_tokens: list):
         """
         Build the prompt text for a given question.
         Here, we follow the recommended prompt format for Video LLaVA.
         """
-        # For example, the prompt is defined with a video token placeholder.
-        prompt = f"USER: <video>\n{question}\nASSISTANT:"
+        prompt_template = [
+            {
+                "role": "system",
+                "content": [
+                    {"type": "text", "text": "This is a simulation of a medical context. The camera is over a table, focusing on a doll that is intended to represent a baby. The doll is supposed to be receiving different medical treatments. Your task is to recognize the treatments that the doll is receiving. The treatments are: ventilation, stimulation, and suction. You will be asked questions about the doll's condition."},
+                ]
+            },
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "Please start your answer with explicitly 'Yes' or 'No', then explain the answer and describe the scene."},
+                    *image_tokens,
+                    {"type": "text", "text": question}
+                ]
+            }
+        ]
+        
+        prompt = self.prompt_processor.apply_chat_template(prompt_template, add_generation_prompt=True)
         return prompt
     
     def answer_questions(self, video_list: list, questions: list, seed: int = 42, temperature: float = 0.1):
@@ -53,9 +69,11 @@ class VideoLLamaEngine(PromptEngine):
         responses = []
         full_answers = []
         
+        image_tokens = [{"type": "image"} for _ in range(len(video_list))]
+        
         for question in questions:
             # Create the prompt text using the given question.
-            prompt_text = self.prompt_definition(question)
+            prompt_text = self.prompt_definition(question, image_tokens)
             
             # Process inputs (text and videos).
             inputs = self.processor(text=prompt_text, videos=video_list, return_tensors="pt").to(self.device)
@@ -76,10 +94,8 @@ class VideoLLamaEngine(PromptEngine):
             
             # Post-process: Remove extra tokens and extract the binary answer (0 or 1).
             final_answer = answer.split("ASSISTANT:")[-1].strip()
-            match = re.search(r'\b[01]\b', final_answer)
-            if match:
-                final_answer = match.group()
-            elif final_answer.lower().startswith("yes"):
+
+            if final_answer.lower().startswith("yes"):
                 final_answer = "1"
             elif final_answer.lower().startswith("no"):
                 final_answer = "0"
