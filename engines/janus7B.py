@@ -43,7 +43,7 @@ class JanusProEngine:
 
         return conversation
 
-    def answer_question(self, image_list: list, question: str, seed: int = 42, temperature: float = 0.1):
+    def answer_question(self, image_list: list, questions: list[str], seed: int = 42, temperature: float = 0.1):
         """
         Given a PIL image and a question, generate an answer.
         """
@@ -51,34 +51,41 @@ class JanusProEngine:
         
         # take the first image from the list
         image = Image.fromarray(image_list[len(image_list) // 2])
+        responses = []
+        full_answers = []
         
-        # Define the prompt for the current question
-        prompt_text = self.prompt_definition(question, image)
+        for question in questions:
         
-        # Process inputs (both text and image)
-        inputs = self.vl_chat_processor(
-            conversation=prompt_text,
-            return_tensors="pt"
-        ).to(self.device)
-        
-        # Generate answer using the model
-        outputs = self.model.generate(
-            **inputs,
-            max_new_tokens=500,
-            temperature=temperature
-        )
-        
-        # Decode the generated output
-        answer = self.processor.decode(outputs[0], skip_special_tokens=True)
-        
-        # Extract the final answer
-        final_answer = answer.split("Assistant:")[-1].strip()
-        
-        if final_answer.lower().startswith("yes"):
-            final_answer = "1"
-        elif final_answer.lower().startswith("no"):
-            final_answer = "0"
-        else:
-            final_answer = "2"
+            # Define the prompt for the current question
+            prompt_text = self.prompt_definition(question, image)
+            
+            # Process inputs (both text and image)
+            inputs = self.vl_chat_processor(
+                conversation=prompt_text,
+                return_tensors="pt"
+            ).to(self.device)
+            
+            # Generate answer using the model
+            outputs = self.model.generate(
+                **inputs,
+                max_new_tokens=500,
+                temperature=temperature
+            )
+            
+            # Decode the generated output
+            answer = self.processor.decode(outputs[0], skip_special_tokens=True)
+            
+            # Extract the final answer
+            final_answer = answer.split("Assistant:")[-1].strip()
+            
+            if final_answer.lower().startswith("yes"):
+                final_answer = "1"
+            elif final_answer.lower().startswith("no"):
+                final_answer = "0"
+            else:
+                final_answer = "2"
+
+            responses.append(final_answer)
+            full_answers.append(answer)
 
         return final_answer, answer
