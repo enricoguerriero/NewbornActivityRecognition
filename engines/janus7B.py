@@ -43,7 +43,7 @@ class JanusProEngine:
 
         return conversation
 
-    def answer_question(self, image_list: list, questions: list[str], seed: int = 42, temperature: float = 0.1):
+    def answer_questions(self, image_list: list, questions: list[str], seed: int = 42, temperature: float = 0.1):
         """
         Given a PIL image and a question, generate an answer.
         """
