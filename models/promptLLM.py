@@ -103,26 +103,29 @@ class PromptLLMModel(BaseVideoModel):
                     logger.debug(f"Predictions: {predictions}, Ground Truth: {gt_list}")
                     predicted_values[clip_name] = full_answer
                     
-                    # Update statistics for each question.
-                    for idx, question in enumerate(questions):
-                        topic_stats[question]['total'] += 1
-                        pred_str = predictions[idx].strip()
-                        true_str = gt_list[idx].strip()
+                    try:
+                        # Update statistics for each question.
+                        for idx, question in enumerate(questions):
+                            topic_stats[question]['total'] += 1
+                            pred_str = predictions[idx].strip()
+                            true_str = gt_list[idx].strip()
+                            
+                            # Update based on binary outcomes.
+                            if true_str == '1':
+                                if pred_str == '1':
+                                    topic_stats[question]['TP'] += 1
+                                    topic_stats[question]['correct'] += 1
+                                else:
+                                    topic_stats[question]['FN'] += 1
+                            elif true_str == '0':
+                                if pred_str == '0':
+                                    topic_stats[question]['TN'] += 1
+                                    topic_stats[question]['correct'] += 1
+                                else:
+                                    topic_stats[question]['FP'] += 1
+                    except:
+                        logger.debug(f"Error processing predictions: {predictions}, Ground Truth: {gt_list}")
                         
-                        # Update based on binary outcomes.
-                        if true_str == '1':
-                            if pred_str == '1':
-                                topic_stats[question]['TP'] += 1
-                                topic_stats[question]['correct'] += 1
-                            else:
-                                topic_stats[question]['FN'] += 1
-                        elif true_str == '0':
-                            if pred_str == '0':
-                                topic_stats[question]['TN'] += 1
-                                topic_stats[question]['correct'] += 1
-                            else:
-                                topic_stats[question]['FP'] += 1
-                    
                     # log details.
                     if logger is not None:
                         logger.debug(f"Predictions: {predictions}, Ground Truth: {gt_list}")
