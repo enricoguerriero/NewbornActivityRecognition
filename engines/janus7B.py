@@ -1,5 +1,5 @@
 from transformers import AutoModelForCausalLM
-from janus.models import MultiModalityCausalLM, VLChatProcessor
+from Janus.janus.models import MultiModalityCausalLM, VLChatProcessor
 import torch
 from PIL import Image
 import re
