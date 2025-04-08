@@ -9,7 +9,7 @@ class JanusProEngine:
     A wrapper for the Janus-Pro model that encapsulates loading the processor and model,
     as well as generating answers from prompts.
     """
-    def __init__(self, model_id: str = "deepseek/janus-pro-7b", device: str = None):
+    def __init__(self, model_id: str = "deepseek-ai/Janus-Pro-7B", device: str = None):
         self.device = torch.device(device if device else ('cuda' if torch.cuda.is_available() else 'cpu'))
         
         # Load the processor and model
