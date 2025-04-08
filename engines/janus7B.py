@@ -32,13 +32,24 @@ class JanusProEngine:
         """
         Define the prompt structure for the model.
         """
+        # conversation = [
+        #     {
+        #         "role": "<|User|>",
+        #         "content": f"<image_placeholder>\n {question}",
+        #         "images": [image],
+        #     },
+        #     {"role": "<|Assistant|>", "content": ""},
+        # ]
         conversation = [
             {
-                "role": "<|User|>",
-                "content": f"<image_placeholder>\n {question}",
+                "role": "user",
+                "content": f"<image_placeholder>\n{question}",
                 "images": [image],
             },
-            {"role": "<|Assistant|>", "content": ""},
+            {
+                "role": "assistant",
+                "content": "",
+            },
         ]
 
         return conversation
