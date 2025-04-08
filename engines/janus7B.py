@@ -58,6 +58,7 @@ class JanusProEngine:
         
             # Define the prompt for the current question
             prompt_text = self.prompt_definition(question, image)
+            print(prompt_text, flush=True)
             
             # Process inputs (both text and image)
             inputs = self.vl_chat_processor(
