@@ -9,7 +9,7 @@ class ValleyEngine(PromptEngine):
     A wrapper for the VALLEY model that encapsulates loading the processor and model,
     as well as generating answers from prompts.
     """
-    def __init__(self, checkpoint_path: str = None, base_model_id: str = "valley-model/Valley-Instruct", device=None):
+    def __init__(self, checkpoint_path: str = None, base_model_id: str = "bytedance-research/Valley-Eagle-7B", device=None):
         # Determine device (GPU or CPU)
         self.device = torch.device(device) if device else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         
