@@ -32,7 +32,7 @@ class VideoLLamaEngine(PromptEngine):
         Build the prompt text for a given question.
         Here, we follow the recommended prompt format for Video LLaVA.
         """
-        prompt_template = [
+        prompt = [
             {
                 "role": "system",
                 "content": [
@@ -49,7 +49,6 @@ class VideoLLamaEngine(PromptEngine):
             }
         ]
         
-        prompt = self.prompt_processor.apply_chat_template(prompt_template, add_generation_prompt=True)
         return prompt
     
     def answer_questions(self, video_list: list, questions: list, seed: int = 42, temperature: float = 0.1):
