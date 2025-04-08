@@ -91,3 +91,43 @@ class VideoLLamaEngine(PromptEngine):
             full_answers.append(answer)
         
         return responses, full_answers
+
+    def describe_the_scene(self, video_list: list, seed: int = 42, temperature: float = 0.1):
+        """
+        Given a list of videos (as numpy arrays), generate a detailed description of the scene.
+        
+        The prompt asks the model to provide a comprehensive description including context,
+        observable details, and any events or motions present in the video.
+        
+        :param video_list: List of video numpy arrays.
+        :param seed: Random seed for reproducibility.
+        :param temperature: Sampling temperature.
+        :return: A string with the generated scene description.
+        """
+        torch.manual_seed(seed)
+        
+        # Define a prompt for scene description.
+        prompt_text = ("USER: <video>\n"
+                       "Please describe the scene in detail. Include the context, any actions or events, "
+                       "and all observable details from the video.\n"
+                       "ASSISTANT:")
+        
+        # Process inputs (text and videos)
+        inputs = self.processor(text=prompt_text, videos=video_list, return_tensors="pt").to(self.device)
+        
+        # Generate the scene description using the model.
+        outputs = self.model.generate(
+            **inputs,
+            max_new_tokens=100,
+            num_beams=5,
+            temperature=temperature,
+            do_sample=True,
+            use_cache=True
+        )
+        
+        # Decode the generated output.
+        description = self.processor.batch_decode(outputs, skip_special_tokens=True)[0]
+        # Extract the description after the "ASSISTANT:" token.
+        description = description.split("ASSISTANT:")[-1].strip()
+        
+        return description
