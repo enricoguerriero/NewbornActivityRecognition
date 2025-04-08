@@ -12,7 +12,7 @@ class VideoLLamaEngine(PromptEngine):
         self.device = torch.device(device) if device else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         
         # Load the processor and model
-        self.processor = VideoLlavaProcessor.from_pretrained(base_model_id)
+        self.prompt_processor = VideoLlavaProcessor.from_pretrained(base_model_id)
         if checkpoint_path:
             self.model = VideoLlavaForConditionalGeneration.from_pretrained(
                 checkpoint_path,
