@@ -75,7 +75,7 @@ class VideoLLamaEngine(PromptEngine):
             prompt_text = self.prompt_definition(question, image_tokens)
             
             # Process inputs (text and videos).
-            inputs = self.processor(text=prompt_text, videos=video_list, return_tensors="pt").to(self.device)
+            inputs = self.prompt_processor(text=prompt_text, videos=video_list, return_tensors="pt").to(self.device)
             
             # Generate answers using the model.
             outputs = self.model.generate(
