@@ -15,7 +15,7 @@ class TimesformerModel(BaseVideoModel):
     Supports multi-label classification where multiple events may occur in the same clip.
     """
 
-    def __init__(self, num_event_classes=7, hidden_size=768, threshold=0.5, device='cuda'):
+    def __init__(self, num_event_classes=4, hidden_size=768, threshold=0.5, device='cuda'):
         """
         Initializes the Timesformer model.
         
