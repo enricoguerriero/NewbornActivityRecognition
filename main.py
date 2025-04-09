@@ -41,6 +41,7 @@ def main():
                               frames_per_second = CONFIG["frames_per_second"],
                               overlapping = CONFIG["overlap"],
                               size = CONFIG["target_size"],
+                              tensors = True,
                               event_categories = CONFIG["event_categories"]) if "train" in tasks else None
     validation_data = VideoDataset(video_folder = os.path.join(CONFIG["video_folder"], "validation"),
                                    annotation_folder = os.path.join(CONFIG["annotation_folder"], "validation"),
@@ -48,6 +49,7 @@ def main():
                                    frames_per_second = CONFIG["frames_per_second"],
                                    overlapping = CONFIG["overlap"],
                                    size = CONFIG["target_size"],
+                                   tensors = True,
                                    event_categories = CONFIG["event_categories"]) if "train" in tasks else None
     test_data = VideoDataset(video_folder = os.path.join(CONFIG["video_folder"], "test"),
                               annotation_folder = os.path.join(CONFIG["annotation_folder"], "test"),
@@ -55,6 +57,7 @@ def main():
                               frames_per_second = CONFIG["frames_per_second"],
                               overlapping = CONFIG["overlap"],
                               size = CONFIG["target_size"],
+                              tensors = True,
                               event_categories = CONFIG["event_categories"]) if "test" or "untrained_test" in tasks else None
     
     train_loader = train_data.get_data_loader(CONFIG["batch_size"], CONFIG["num_workers"]) if "train" in tasks else None
