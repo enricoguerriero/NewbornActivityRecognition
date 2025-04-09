@@ -39,21 +39,21 @@ def main():
                               annotation_folder = os.path.join(CONFIG["annotation_folder"], "train"),
                               clip_length = CONFIG["clip_length"],
                               frames_per_second = CONFIG["frames_per_second"],
-                              overlap = CONFIG["overlap"],
+                              overlapping = CONFIG["overlap"],
                               target_size = CONFIG["target_size"],
                               event_categories = CONFIG["event_categories"]) if "train" in tasks else None
     validation_data = VideoDataset(video_folder = os.path.join(CONFIG["video_folder"], "validation"),
                                    annotation_folder = os.path.join(CONFIG["annotation_folder"], "validation"),
                                    clip_length = CONFIG["clip_length"],
                                    frames_per_second = CONFIG["frames_per_second"],
-                                   overlap = CONFIG["overlap"],
+                                   overlapping = CONFIG["overlap"],
                                    target_size = CONFIG["target_size"],
                                    event_categories = CONFIG["event_categories"]) if "train" in tasks else None
     test_data = VideoDataset(video_folder = os.path.join(CONFIG["video_folder"], "test"),
                               annotation_folder = os.path.join(CONFIG["annotation_folder"], "test"),
                               clip_length = CONFIG["clip_length"],
                               frames_per_second = CONFIG["frames_per_second"],
-                              overlap = CONFIG["overlap"],
+                              overlapping = CONFIG["overlap"],
                               target_size = CONFIG["target_size"],
                               event_categories = CONFIG["event_categories"]) if "test" or "untrained_test" in tasks else None
     
