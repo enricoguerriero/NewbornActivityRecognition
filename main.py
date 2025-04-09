@@ -1,15 +1,22 @@
-from config import CONFIG
-from utils import setup_all_loggers, select_model, wandb_session
+from utils import setup_all_loggers, select_model, wandb_session, load_config
 import logging
-from data.dataset import VideoDataset
+from data.clip_dataset import VideoDataset
 import os
+from argparse import ArgumentParser
 
 def main():
     
-    model_name = CONFIG["model_name"]
-    tasks = CONFIG["task"]
+    parser = ArgumentParser(description="Main function for video activity recognition.")
+    parser.add_argument("--model_name", type=str, required=True, help="Name of the model to use.")
+    parser.add_argument("--tasks", type=str, nargs='+', required=True, help="List of tasks to perform.")
+    args = parser.parse_args()
     
+    model_name = args.model_name
+    tasks = args.tasks
+        
     setup_all_loggers(model_name, tasks)
+    
+    CONFIG = load_config(model_name)
     
     logger = logging.getLogger(f'{model_name}_main')
     logger.info("--------------------------------")
@@ -26,26 +33,29 @@ def main():
     
     logger.debug(f'Configuration: {CONFIG}')
     
-    if "exploring" in tasks:
-        logger.info("...Exploring the data...")
-        pass        
-    
-    if "preprocessing" in tasks:
-        logger.info("...Preprocessing videos...")
-        model.transform = model.define_transformation(CONFIG["target_size"]) 
-        logger.debug(f"Transform: {model.transform}")
-        model.preprocess_videos(set_name = "train", clip_length = CONFIG["clip_length"], frames_per_second = CONFIG["frames_per_second"],
-                                overlap = CONFIG["overlap"], event_categories = CONFIG["event_categories"]) if "train" in tasks else None
-        model.preprocess_videos(set_name = "validation", clip_length = CONFIG["clip_length"], frames_per_second = CONFIG["frames_per_second"],
-                                overlap = CONFIG["overlap"], event_categories = CONFIG["event_categories"]) if "train" in tasks else None
-        model.preprocess_videos(set_name = "test", clip_length = CONFIG["clip_length"], frames_per_second = CONFIG["frames_per_second"],
-                                overlap = CONFIG["overlap"], event_categories = CONFIG["event_categories"]) if "test" or "untrained_test" in tasks else None
-        
     logger.info("...Loading data...")
         
-    train_data = VideoDataset(os.path.join(model.output_folder, "train")) if "train" in tasks else None
-    validation_data = VideoDataset(os.path.join(model.output_folder, "validation")) if "train" in tasks else None
-    test_data = VideoDataset(os.path.join(model.output_folder, "test")) if "test" or "untrained_test" in tasks else None
+    train_data = VideoDataset(video_folder = os.path.join(CONFIG["video_folder"], "train"),
+                              annotation_folder = os.path.join(CONFIG["annotation_folder"], "train"),
+                              clip_length = CONFIG["clip_length"],
+                              frames_per_second = CONFIG["frames_per_second"],
+                              overlap = CONFIG["overlap"],
+                              target_size = CONFIG["target_size"],
+                              event_categories = CONFIG["event_categories"]) if "train" in tasks else None
+    validation_data = VideoDataset(video_folder = os.path.join(CONFIG["video_folder"], "validation"),
+                                   annotation_folder = os.path.join(CONFIG["annotation_folder"], "validation"),
+                                   clip_length = CONFIG["clip_length"],
+                                   frames_per_second = CONFIG["frames_per_second"],
+                                   overlap = CONFIG["overlap"],
+                                   target_size = CONFIG["target_size"],
+                                   event_categories = CONFIG["event_categories"]) if "train" in tasks else None
+    test_data = VideoDataset(video_folder = os.path.join(CONFIG["video_folder"], "test"),
+                              annotation_folder = os.path.join(CONFIG["annotation_folder"], "test"),
+                              clip_length = CONFIG["clip_length"],
+                              frames_per_second = CONFIG["frames_per_second"],
+                              overlap = CONFIG["overlap"],
+                              target_size = CONFIG["target_size"],
+                              event_categories = CONFIG["event_categories"]) if "test" or "untrained_test" in tasks else None
     
     train_loader = train_data.get_data_loader(CONFIG["batch_size"], CONFIG["num_workers"]) if "train" in tasks else None
     validation_loader = validation_data.get_data_loader(CONFIG["batch_size"], CONFIG["num_workers"]) if "train" in tasks else None

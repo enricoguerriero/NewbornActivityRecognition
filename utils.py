@@ -1,5 +1,14 @@
 import logging
 import wandb
+import importlib
+
+def load_config(model_name):
+    try:
+        config_module = importlib.import_module(f"configs.{model_name}")
+        return config_module.CONFIG
+    except ModuleNotFoundError:
+        raise ValueError(f"No config found for model '{model_name}'")
+
 
 def setup_logger(name, filename):
     """Function to setup a logger."""

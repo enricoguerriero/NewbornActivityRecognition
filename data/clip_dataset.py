@@ -2,35 +2,15 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 import os
 import cv2
-import numpy as np
 from tqdm import tqdm
 from torchvision import transforms
-from PIL import Image
-
-class LeftCrop:
-    def __init__(self, size):
-        self.size = size  # assumes size is an int (for square crop)
-
-    def __call__(self, img: Image.Image):
-        width, height = img.size
-        crop_size = self.size
-
-        # Ensure image is large enough
-        if width < crop_size or height < crop_size:
-            raise ValueError(f"Image size {img.size} is smaller than crop size {crop_size}")
-
-        # Calculate left crop coordinates
-        left = 0
-        upper = (height - crop_size) // 2
-        right = crop_size
-        lower = upper + crop_size
-
-        return img.crop((left, upper, right, lower))
+from data.utils import LeftCrop
 
 class VideoDataset(Dataset):
     def __init__(self, video_folder: str, annotation_folder: str, 
                  clip_length: float, overlapping: float, size: tuple, 
-                 frames_per_second: int, tensors = False, event_categories: list[str] = []):
+                 frames_per_second: int, tensors = False, event_categories: list[str] = [],
+                 exploring: bool = False):
 
         self.video_folder = video_folder
         self.video_list = sorted(os.listdir(video_folder))
@@ -81,6 +61,10 @@ class VideoDataset(Dataset):
             self.video_tensors = None
         
         self.event_categories = event_categories if event_categories else ["Baby visible", "Ventilation", "Stimulation", "Suction"]
+        
+        if exploring:
+            # some stuff to explore the dataset
+            pass
         
         # dummy cache system ! to check if it makes sense
         self.cache = {}
