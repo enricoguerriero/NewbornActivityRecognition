@@ -36,6 +36,10 @@ class TimesformerModel(BaseVideoModel):
         )
         # Remove the original classification head.
         self.timesformer.classifier = nn.Identity()
+        
+        for param in self.timesformer.parameters():
+            param.requires_grad = False
+        
         # Custom classification head: outputs logits for each event.
         self.event_classifier = nn.Linear(hidden_size, num_event_classes)
         self.to(self.device)

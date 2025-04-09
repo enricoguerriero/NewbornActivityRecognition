@@ -1,4 +1,5 @@
 from PIL import Image
+import torch
 
 class LeftCrop:
     def __init__(self, size):
@@ -19,3 +20,14 @@ class LeftCrop:
         lower = upper + crop_height
 
         return img.crop((left, upper, right, lower))
+    
+def pad_or_truncate(tensor, length=24):
+    T, C, H, W = tensor.shape
+    if T == length:
+        return tensor
+    elif T > length:
+        return tensor[:length]
+    else:
+        pad_size = length - T
+        padding = torch.zeros(pad_size, C, H, W) 
+        return torch.cat((tensor, padding), dim=0)

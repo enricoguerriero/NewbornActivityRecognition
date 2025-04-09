@@ -4,7 +4,7 @@ import os
 import cv2
 from tqdm import tqdm
 from torchvision import transforms
-from data.utils import LeftCrop
+from data.utils import LeftCrop, pad_or_truncate
 
 class VideoDataset(Dataset):
     def __init__(self, video_folder: str, annotation_folder: str, 
@@ -115,6 +115,7 @@ class VideoDataset(Dataset):
             frames = self.load_frames(video_path, clip_idx)
         labels = self.load_labels(annotation_path, clip_idx)
         
+        frames = pad_or_truncate(frames, length=int(self.clip_length * self.frames_per_second))
         clip_data = {
             'frames': frames,
             'labels': labels,
