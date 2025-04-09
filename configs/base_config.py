@@ -8,8 +8,8 @@ BASE_CONFIG = {
     "event_categories": ["Baby visible", "Ventilation", "Stimulation", "Suction"],
    
     # training parameters
-    "batch_size": 16,
-    "num_workers": 1,
+    "batch_size": 8,
+    "num_workers": 4,
     "epochs": 10,
     "learning_rate": 0.001,
     "optimizer": "adam",

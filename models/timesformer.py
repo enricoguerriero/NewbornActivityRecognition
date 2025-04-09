@@ -63,18 +63,21 @@ class TimesformerModel(BaseVideoModel):
 
     def compute_metrics(self, all_predictions, all_labels, all_probs):
         """
-        Computes additional metrics for multi-label classification.
+        Computes overall and per-event metrics for multi-label classification.
         
         Args:
-            all_predictions (np.array): Binary predictions (thresholded output).
-            all_labels (np.array): Ground truth binary labels.
-            all_probs (np.array): Probabilities computed from the logits.
+            all_predictions (np.array): Binary predictions (thresholded output), shape (N, num_events).
+            all_labels (np.array): Ground truth binary labels, shape (N, num_events).
+            all_probs (np.array): Probabilities computed from the logits, shape (N, num_events).
             
         Returns:
-            metrics (dict): Dictionary with precision, recall, F1 scores (micro and macro),
-                            ROC AUC and average precision scores.
+            metrics (dict): Dictionary with overall precision, recall, F1 scores (micro and macro),
+                            ROC AUC and average precision scores, plus a "per_event" key containing
+                            the computed metrics for each event.
         """
         metrics = {}
+        
+        # Overall micro / macro scores
         metrics["precision_micro"] = precision_score(all_labels, all_predictions, average="micro", zero_division=0)
         metrics["recall_micro"] = recall_score(all_labels, all_predictions, average="micro", zero_division=0)
         metrics["f1_micro"] = f1_score(all_labels, all_predictions, average="micro", zero_division=0)
@@ -83,7 +86,6 @@ class TimesformerModel(BaseVideoModel):
         metrics["recall_macro"] = recall_score(all_labels, all_predictions, average="macro", zero_division=0)
         metrics["f1_macro"] = f1_score(all_labels, all_predictions, average="macro", zero_division=0)
 
-        # Compute ROC AUC using probabilities; may fail if a label has no positive samples.
         try:
             metrics["roc_auc"] = roc_auc_score(all_labels, all_probs, average="macro")
         except Exception as e:
@@ -95,7 +97,34 @@ class TimesformerModel(BaseVideoModel):
         except Exception as e:
             metrics["average_precision_micro"] = None
             metrics["average_precision_macro"] = None
-        
+
+        # Compute per-event metrics
+        num_events = all_labels.shape[1]  # Assuming shape is (N, num_events)
+        per_event_metrics = {}
+
+        for i in range(num_events):
+            y_true = all_labels[:, i]
+            y_pred = all_predictions[:, i]
+            y_probs = all_probs[:, i]
+            event_dict = {}
+
+            event_dict["precision"] = precision_score(y_true, y_pred, zero_division=0)
+            event_dict["recall"] = recall_score(y_true, y_pred, zero_division=0)
+            event_dict["f1_score"] = f1_score(y_true, y_pred, zero_division=0)
+            
+            try:
+                event_dict["roc_auc"] = roc_auc_score(y_true, y_probs)
+            except Exception as e:
+                event_dict["roc_auc"] = None
+            
+            try:
+                event_dict["average_precision"] = average_precision_score(y_true, y_probs)
+            except Exception as e:
+                event_dict["average_precision"] = None
+
+            per_event_metrics[f"event_{i}"] = event_dict
+
+        metrics["per_event"] = per_event_metrics
         return metrics
 
     def train_epoch(self, dataloader, optimizer, criterion, epoch, verbose=True):
