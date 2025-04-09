@@ -78,9 +78,10 @@ class VideoDataset(Dataset):
             fps = cap.get(cv2.CAP_PROP_FPS)
             num_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
             video_length = num_frames / fps
-            num_clips += video_length - (self.clip_length - self.overlapping)
+            clips_in_video = (video_length - (self.clip_length - self.overlapping)) / (self.clip_length - self.overlapping)
+            num_clips += max(0, int(clips_in_video))
             cap.release()
-        return num_clips
+        return int(num_clips)
 
     # still to decide if using this function (memory issues)
     def _load_clip_data_from_cache(self, clip_name):
