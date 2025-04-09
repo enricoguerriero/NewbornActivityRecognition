@@ -9,9 +9,8 @@ from data.utils import LeftCrop
 class VideoDataset(Dataset):
     def __init__(self, video_folder: str, annotation_folder: str, 
                  clip_length: float, overlapping: float, size: tuple, 
-                 frames_per_second: int, tensors = False, event_categories: list[str] = [],
+                 frames_per_second: int, tensors=False, event_categories: list[str] = [],
                  exploring: bool = False):
-
         self.video_folder = video_folder
         self.video_list = sorted(os.listdir(video_folder))
         self.annotation_folder = annotation_folder
@@ -20,27 +19,24 @@ class VideoDataset(Dataset):
         self.overlapping = overlapping
         self.size = size
         self.frames_per_second = frames_per_second
+        self.video_tensors = None
         if tensors:
-            # transform the entire videos now and save them as tensors
+            # Transform the entire videos now and store them as tensors.
             self.video_tensors = {}
-            for video in tqdm(self.video_list, desc = "Transforming videos into tensors"):
+            for video in tqdm(self.video_list, desc="Transforming videos into tensors"):
                 video_path = os.path.join(video_folder, video)
                 cap = cv2.VideoCapture(video_path)    
                 frames = []
-                
                 fps = cap.get(cv2.CAP_PROP_FPS)
                 frame_interval = int(round(fps / self.frames_per_second))
-                print(f"FPS: {fps}, fps desired: {self.frames_per_second}, Frame Interval: {frame_interval}")
                 if frame_interval < 1:
                     frame_interval = 1
-                
                 transform = transforms.Compose([
                     transforms.ToPILImage(),
                     LeftCrop(self.size),  
                     transforms.Resize(self.size),  
                     transforms.ToTensor()
                 ])
-                
                 frame_index = 0
                 while True:
                     ret, frame = cap.read()
@@ -50,78 +46,81 @@ class VideoDataset(Dataset):
                         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                         frame = transform(frame)
                         frames.append(frame)
-                    
                     frame_index += 1
-                
                 if frames:
                     video_tensor = torch.stack(frames)
                     self.video_tensors[video] = video_tensor
                 cap.release()
-        else:
-            self.video_tensors = None
-        
+                
         self.event_categories = event_categories if event_categories else ["Baby visible", "Ventilation", "Stimulation", "Suction"]
         
         if exploring:
-            # some stuff to explore the dataset
+            # Additional exploration functionality can be added here.
             pass
         
-        # dummy cache system ! to check if it makes sense
+        # Dummy cache system to store previously loaded clips.
         self.cache = {}
-
-    def __len__(self):
-        num_clips = 0
-        # compute the number of clips for each video in the folder
-        for video in self.video_list:
-            video_path = os.path.join(self.video_folder, video)
+        
+        # Precompute the mapping of global indices to (video_idx, clip_idx).
+        # This handles videos with different lengths.
+        self.index_mapping = []
+        for video_idx, video in enumerate(self.video_list):
+            video_path = os.path.join(video_folder, video)
             cap = cv2.VideoCapture(video_path)
+            if not cap.isOpened():
+                continue
             fps = cap.get(cv2.CAP_PROP_FPS)
             num_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-            video_length = num_frames / fps
-            clips_in_video = (video_length - (self.clip_length - self.overlapping)) / (self.clip_length - self.overlapping)
-            num_clips += max(0, int(clips_in_video))
+            video_length = num_frames / fps if fps > 0 else 0
+            # Compute how many clips can be extracted
+            num_clips = max(0, int((video_length - (self.clip_length - self.overlapping)) / (self.clip_length - self.overlapping)))
+            for clip_idx in range(num_clips):
+                self.index_mapping.append((video_idx, clip_idx))
             cap.release()
-        return int(num_clips)
-
-    # still to decide if using this function (memory issues)
+            
+    def __len__(self):
+        # Total number of clips computed from all videos.
+        return len(self.index_mapping)
+    
     def _load_clip_data_from_cache(self, clip_name):
         """
-        Internal helper to load clip data from a file and cache it.
-        Assumes the file is saved via torch.save() as a dictionary.
+        Internal helper to load clip data from a cache.
         """
         if clip_name in self.cache:
             return self.cache[clip_name]
-        else:
-            return None
+        return None
 
     def __getitem__(self, idx):
         """
-        Loads and returns video clip data
+        Loads and returns video clip data for a given global index.
         """
-        video_idx, clip_idx = idx
+        # Retrieve the corresponding video and clip indices from our mapping.
+        video_idx, clip_idx = self.index_mapping[idx]
         video = self.video_list[video_idx]
-        annotation = self.annotation_list[video_idx]
+        annotation = self.annotation_list[video_idx]  # Assuming sorting aligns videos with annotations.
         video_path = os.path.join(self.video_folder, video)
         annotation_path = os.path.join(self.annotation_folder, annotation)
         
         clip_name = f"{video}_{clip_idx}"
         
-        # check if it is in cache
+        # Check if clip data has been cached.
         clip_data = self._load_clip_data_from_cache(clip_name)
         if clip_data is not None:
             return clip_data
         
+        # Load frames from precomputed tensors if available; otherwise, load from video file.
         if self.video_tensors is not None:
             frames = self.load_frames_from_tensors(video, clip_idx)
         else:
             frames = self.load_frames(video_path, clip_idx)
         labels = self.load_labels(annotation_path, clip_idx)
+        
         clip_data = {
             'frames': frames,
             'labels': labels,
-            'clip_name': clip_name} 
-        self.cache[clip_name] = clip_data       
-        
+            'clip_name': clip_name
+        }
+        self.cache[clip_name] = clip_data
         return clip_data
 
     def load_frames(self, video_path, clip_idx):
@@ -166,7 +165,7 @@ class VideoDataset(Dataset):
     
     def load_frames_from_tensors(self, video, clip_idx):
         """
-        Load frames from a video clip file.
+        Load frames from a precomputed video tensor.
         """
         video_tensor = self.video_tensors[video]
         start_frame = int(clip_idx * self.frames_per_second)
@@ -176,7 +175,7 @@ class VideoDataset(Dataset):
 
     def load_labels(self, annotation_path, clip_idx):
         """
-        Load labels from a video clip file.
+        Load labels for the clip from the annotation file.
         """
         clip_window_start = clip_idx * (self.clip_length - self.overlapping)
         clip_window_end = clip_window_start + self.clip_length
@@ -186,7 +185,6 @@ class VideoDataset(Dataset):
         
         labels = {cat: 0 for cat in self.event_categories}
         
-        # assuming event categories can only be 4 or 7
         if len(self.event_categories) == 4:
             mapping = {
                 "Baby visible": "Baby visible",
@@ -214,7 +212,7 @@ class VideoDataset(Dataset):
                 lines = f.readlines()
         except Exception as e:
             print(f"Error reading annotation file {annotation_path}: {e}", flush=True)
-            return torch.tensor(labels, dtype=torch.int32)
+            return torch.tensor(list(labels.values()), dtype=torch.float)
 
         for line in lines:
             line = line.strip()
@@ -230,27 +228,20 @@ class VideoDataset(Dataset):
             except ValueError:
                 continue
             mapped_label = mapping.get(event_name)
-            
             if mapped_label is None:
-                # print(f"Event {event_name} not in mapping, skipping.", flush=True)
-                # just skip stimulation extremities
                 continue
-            
             overlap = max(0, min(clip_end_ms, event_end) - max(clip_start_ms, event_start))
             proportion = overlap / (self.clip_length * 1000)
-            
             labels[mapped_label] += proportion
-    
+        
         for cat in labels:
-            labels[cat] = min(max(labels[cat], 0), 1) # to be sure it is between 0 and 1
+            labels[cat] = min(max(labels[cat], 0), 1)
         
         label_list = [labels[cat] for cat in self.event_categories]
         return torch.tensor(label_list, dtype=torch.float)
             
-    
     def get_data_loader(self, batch_size: int, shuffle: bool = True, num_workers: int = 0):
         """
         Returns a DataLoader instance for the current dataset.
         """
         return DataLoader(self, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
-    
