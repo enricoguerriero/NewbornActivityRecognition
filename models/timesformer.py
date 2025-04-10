@@ -75,8 +75,12 @@ class TimesformerModel(BaseVideoModel):
                             ROC AUC and average precision scores, plus a "per_event" key containing
                             the computed metrics for each event.
         """
+        # Ensure that the binary predictions and labels are integer types.
+        all_labels = all_labels.astype(int)
+        all_predictions = all_predictions.astype(int)
+
         metrics = {}
-        
+
         # Overall micro / macro scores
         metrics["precision_micro"] = precision_score(all_labels, all_predictions, average="micro", zero_division=0)
         metrics["recall_micro"] = recall_score(all_labels, all_predictions, average="micro", zero_division=0)
@@ -99,24 +103,25 @@ class TimesformerModel(BaseVideoModel):
             metrics["average_precision_macro"] = None
 
         # Compute per-event metrics
-        num_events = all_labels.shape[1]  # Assuming shape is (N, num_events)
+        num_events = all_labels.shape[1]  # Assumes shape is (N, num_events)
         per_event_metrics = {}
 
         for i in range(num_events):
-            y_true = all_labels[:, i]
-            y_pred = all_predictions[:, i]
-            y_probs = all_probs[:, i]
-            event_dict = {}
+            # Extract and cast the values for event i
+            y_true = all_labels[:, i].astype(int)
+            y_pred = all_predictions[:, i].astype(int)
+            y_probs = all_probs[:, i]  # Keep as float for probability-based scores
 
+            event_dict = {}
             event_dict["precision"] = precision_score(y_true, y_pred, zero_division=0)
             event_dict["recall"] = recall_score(y_true, y_pred, zero_division=0)
             event_dict["f1_score"] = f1_score(y_true, y_pred, zero_division=0)
-            
+
             try:
                 event_dict["roc_auc"] = roc_auc_score(y_true, y_probs)
             except Exception as e:
                 event_dict["roc_auc"] = None
-            
+
             try:
                 event_dict["average_precision"] = average_precision_score(y_true, y_probs)
             except Exception as e:
