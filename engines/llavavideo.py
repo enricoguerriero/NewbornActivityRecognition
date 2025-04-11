@@ -28,7 +28,7 @@ class VideoLLavaEngine(PromptEngine):
         self.model.eval()
         self.name = "llava_video"
     
-    def prompt_definition(self, question: str, system_message: str = "You are a helpful assistant.", frames = None):
+    def prompt_definition(self, question: str, system_message: str = "You are a helpful assistant."):
         """
         Build the prompt text for a given question.
         Here, we follow the recommended prompt format for Video LLaVA.
@@ -38,6 +38,8 @@ class VideoLLavaEngine(PromptEngine):
         return prompt
     
     def process_frames(self, frames):
+        # transform from tensor to list of numpy arrays
+        frames = [frame.cpu().numpy() for frame in frames]
         return frames
         
     

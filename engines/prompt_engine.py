@@ -16,11 +16,13 @@ class PromptEngine:
         
         print(frames, flush=True)
         
-        prompt = self.prompt_definition(question, system_message, frames)
+        prompt = self.prompt_definition(question, system_message)
+        
+        video = self.process_frames(frames)
         
         inputs = self.processor(
             text=prompt,
-            videos = frames,
+            videos = video,
             return_tensors="pt"
         ).to(self.device)
         
