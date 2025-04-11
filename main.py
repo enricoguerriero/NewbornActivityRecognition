@@ -88,7 +88,10 @@ def main():
         
     if "test_untrained" in tasks:
         logger.info("...Testing the model without knowledge...")
-        history = model.test_without_knowledge(test_loader, questions = None, wandb = wandb)
+        history = model.test_without_knowledge(data_loader = test_loader, 
+                                               questions = CONFIG["question"],
+                                               system_message = CONFIG["system_message"], 
+                                               wandb = wandb)
         logger.info(f"History: {history}")
 
 

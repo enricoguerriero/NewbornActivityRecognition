@@ -53,18 +53,18 @@ def select_engine(engine_name):
     elif engine_name == "smolvlm256":
         from engines.smolvlm256 import SmolVLM256Engine
         return SmolVLM256Engine()
-    elif engine_name == "smolvlm500":
-        from engines.smolvlm500 import SmolVLM500Engine
-        return SmolVLM500Engine()
-    elif engine_name == "llama_video":
-        from engines.llamavideo import VideoLLamaEngine
-        return VideoLLamaEngine()
+    # elif engine_name == "smolvlm500":
+    #     from engines.smolvlm500 import SmolVLM500Engine
+    #     return SmolVLM500Engine()
+    elif engine_name == "llava_video":
+        from NewbornActivityRecognition.engines.llavavideo import VideoLLavaEngine
+        return VideoLLavaEngine()
     elif engine_name == "janus7b":
         from engines.janus7B import JanusProEngine
         return JanusProEngine()
-    elif engine_name == "valley":
-        from engines.valley import ValleyEngine
-        return ValleyEngine()
+    # elif engine_name == "valley":
+    #     from engines.valley import ValleyEngine
+    #     return ValleyEngine()
     else:
         raise ValueError(f"Engine {engine_name} not available")
     

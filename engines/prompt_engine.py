@@ -5,13 +5,36 @@ class PromptEngine:
         self.output_dim = output_dim
         # Here you could load a pre-trained prompt model or set up your prompt logic.
         self.name = "genericPromptEngine"
-
-    def __call__(self, pil_images):
-        # For demonstration, assume each image is processed into a fixed-size feature vector.
-        batch_size = len(pil_images)
-        # In a real implementation, you would run inference on your prompt-based LLM.
-        # Here we simply return a tensor of shape (batch_size, output_dim).
-        return torch.randn(batch_size, self.output_dim, device="cuda")
-    
-    def answer_questions(self, frames, questions):
+        
+    def process_frames(self, frames):
         pass
+    
+    def prompt_definition(self, question, system_message):
+        pass 
+    
+    def answer_question(self, frames, system_message, question, seed = 42, temperature = 0.1):
+
+        torch.manual_seed(seed)
+        
+        prompt = self.prompt_definition(question, system_message)
+        
+        frames_input = self.process_frames(frames)
+        
+        inputs = self.processor(
+            text=prompt,
+            videos=frames_input,
+            return_tensors="pt"
+        ).to(self.device)
+        
+        generate_kwargs = {
+            "max_new_tokens": 100,
+            "do_sample": False,
+            "temperature": temperature,
+            "use_cache": True,
+        }
+        
+        outputs = self.model.generate(**inputs, **generate_kwargs)
+        
+        responses = self.processor.batch_decode(outputs, skip_special_tokens=True)[0]
+        
+        print(responses, flush=True)

@@ -3,7 +3,7 @@ import re
 from transformers import VideoLlavaForConditionalGeneration, VideoLlavaProcessor
 from engines.prompt_engine import PromptEngine 
 
-class VideoLLamaEngine(PromptEngine):
+class VideoLLavaEngine(PromptEngine):
     """
     A wrapper for the Video LLaVA model that encapsulates loading the processor and model,
     as well as generating answers from prompts, with an interface similar to the SmolVLMEngine.
@@ -25,18 +25,34 @@ class VideoLLamaEngine(PromptEngine):
             ).to(self.device)
         
         self.model.eval()
-        self.name = "llama_video"
+        self.name = "llava_video"
     
-    def prompt_definition(self, question: str):
+    def prompt_definition(self, question: str, system_message: str = "You are a helpful assistant."):
         """
         Build the prompt text for a given question.
         Here, we follow the recommended prompt format for Video LLaVA.
         """
-        prompt = ("USER: <video>\n"
-                 f"Please start your answer with explicitly 'Yes' or 'No', then explain the answer and describe the scene.{question}\n"
-                 "ASSISTANT:")
+        prompt = [
+            {
+                "role": "system",
+                "content": [
+                    {"type": "text", "text": system_message},
+                ],
+            },
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": question},
+                    {"type": "video"},
+                ],
+            },
+        ]
         
         return prompt
+    
+    def process_frames(self, frames):
+        return frames
+        
     
     def answer_questions(self, video_list: list, questions: list, seed: int = 42, temperature: float = 0.1):
         """

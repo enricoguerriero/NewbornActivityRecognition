@@ -30,7 +30,7 @@ class PromptLLMModel(BaseVideoModel):
         self.mapping = new_layer_config
         return self
 
-    def test_without_knowledge(self, dataloader: DataLoader, questions: list[str] = None, wandb=None):
+    def test_without_knowledge(self, dataloader: DataLoader, questions: list[str] = None, system_message: str = None, wandb=None):
         """
         Test the model on a dataset without using extra knowledge from the prompt engine.
         For each sample (video clip) from the dataloader, the prompt engine is queried with a list of binary
@@ -47,18 +47,16 @@ class PromptLLMModel(BaseVideoModel):
         :return: Dictionary mapping each question to its accuracy.
         """
         logger = logging.getLogger(f'{self.model_name}_test_untrained')
-        
-        # Default questions if none provided.
+
         if questions is None:
             questions = [
-                "Is the baby visible? 1 if it is visible, 0 otherwise",
-                "Is the baby receiving CPAP? 1 if it is receiving CPAP, 0 otherwise",
-                "Is the baby receiving PPV? 1 if it is receiving PPV, 0 otherwise",
-                "Is the baby receiving stimulation on the back/nates? 1 if it is receiving stimulation on the back/nates, 0 otherwise",
-                "Is the baby receiving stimulation on the extremities? 1 if it is receiving stimulation on the extremities, 0 otherwise",
-                "Is the baby receiving stimulation on the trunk? 1 if it is receiving stimulation on the trunk, 0 otherwise",
-                "Is the baby receiving suction? 1 if it is receiving suction, 0 otherwise"
+                "Is the baby visible?",
+                "Is the baby receiving ventilation?",
+                "Is the baby receiving stimulation?",
+                "Is the baby receiving suction?"
             ]
+        if system_message is None:
+            system_message = "You are a newborn activity recognition model. Answer the questions based on the video frames."
         
         # Initialize statistics for each question.
         topic_stats = {
@@ -83,15 +81,15 @@ class PromptLLMModel(BaseVideoModel):
                     frames_tensor = frames_batch[i]  # Shape: (num_frames, channels, height, width)
                     clip_name = clip_names[i]
 
-                    # Convert each frame to a PIL image.
-                    pil_images = []
-                    for frame in frames_tensor:
-                        # Convert tensor to numpy array. Permute to (H, W, C) and cast to uint8.
-                        np_frame = frame.permute(1, 2, 0).cpu().numpy()
-                        # If the frame is not already in uint8, scale/clip accordingly.
-                        if np_frame.dtype != np.uint8:
-                            np_frame = (255 * np.clip(np_frame, 0, 1)).astype(np.uint8)
-                        pil_images.append(Image.fromarray(np_frame))
+                    # # Convert each frame to a PIL image.
+                    # pil_images = []
+                    # for frame in frames_tensor:
+                    #     # Convert tensor to numpy array. Permute to (H, W, C) and cast to uint8.
+                    #     np_frame = frame.permute(1, 2, 0).cpu().numpy()
+                    #     # If the frame is not already in uint8, scale/clip accordingly.
+                    #     if np_frame.dtype != np.uint8:
+                    #         np_frame = (255 * np.clip(np_frame, 0, 1)).astype(np.uint8)
+                    #     pil_images.append(Image.fromarray(np_frame))
                     
                     # Convert ground truth labels to strings for comparison.
                     gt_tensor = labels_batch[i]  
@@ -99,7 +97,7 @@ class PromptLLMModel(BaseVideoModel):
                     gt_list = [str(int(val.item())) for val in gt_tensor]
                     
                     # Obtain predictions from the prompt engine.
-                    predictions, full_answer = self.prompt_engine.answer_questions(pil_images, questions)
+                    predictions, full_answer = self.prompt_engine.answer_question(frames_tensor, system_message, questions)
                     logger.debug(f"Predictions: {predictions}, Ground Truth: {gt_list}")
                     predicted_values[clip_name] = full_answer
                     
@@ -133,7 +131,12 @@ class PromptLLMModel(BaseVideoModel):
                         for idx, question in enumerate(questions):
                             wandb.log({f"{question}_prediction": float(predictions[idx]), f"{question}_gt": float(gt_list[idx])})
         
-        # Compute accuracy per question.
+        metrics = self.compute_metrics(topic_stats, logger, wandb)
+            
+        return metrics, predicted_values
+    
+    def compute_metrics(self, topic_stats, logger, wandb):
+        
         metrics = {}
         for question, stats in topic_stats.items():
             total = stats['total']
@@ -151,6 +154,7 @@ class PromptLLMModel(BaseVideoModel):
                 'recall': recall,
                 'f1': f1
             }
+            
             if logger is not None:
                 logger.info(
                     f"Question: {question}, Accuracy: {accuracy*100:.2f}%, "
@@ -164,7 +168,7 @@ class PromptLLMModel(BaseVideoModel):
                     f"{question}_f1": f1
                 })
             
-        return metrics, predicted_values
+        return metrics
 
 
     def describe_without_training(self, dataloader: DataLoader, wandb=None):
