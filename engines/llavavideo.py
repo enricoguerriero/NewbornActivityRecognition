@@ -12,7 +12,7 @@ class VideoLLavaEngine(PromptEngine):
         self.device = torch.device(device) if device else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         
         # Load the processor and model
-        self.prompt_processor = VideoLlavaProcessor.from_pretrained(base_model_id)
+        self.processor = VideoLlavaProcessor.from_pretrained(base_model_id)
         if checkpoint_path:
             self.model = VideoLlavaForConditionalGeneration.from_pretrained(
                 checkpoint_path,
@@ -76,7 +76,7 @@ class VideoLLavaEngine(PromptEngine):
             prompt_text = self.prompt_definition(question)
             
             # Process inputs (text and videos).
-            inputs = self.prompt_processor(text=prompt_text, videos=video_list, return_tensors="pt").to(self.device)
+            inputs = self.processor(text=prompt_text, videos=video_list, return_tensors="pt").to(self.device)
             
             # Generate answers using the model.
             outputs = self.model.generate(
@@ -90,7 +90,7 @@ class VideoLLavaEngine(PromptEngine):
             
             # Decode the generated output.
             # Using batch_decode here so that it returns a list; we extract the first answer.
-            answer = self.prompt_processor.batch_decode(outputs, skip_special_tokens=True)[0]
+            answer = self.processor.batch_decode(outputs, skip_special_tokens=True)[0]
             
             # Post-process: Remove extra tokens and extract the binary answer (0 or 1).
             final_answer = answer.split("ASSISTANT:")[-1].strip()
@@ -128,7 +128,7 @@ class VideoLLavaEngine(PromptEngine):
                        "and all observable details from the video.\n"
                        "ASSISTANT:")
  
-        inputs = self.prompt_processor(text=prompt_text, videos=video_list, return_tensors="pt").to(self.device)
+        inputs = self.processor(text=prompt_text, videos=video_list, return_tensors="pt").to(self.device)
         
         # Generate the scene description using the model.
         outputs = self.model.generate(
@@ -141,7 +141,7 @@ class VideoLLavaEngine(PromptEngine):
         )
         
         # Decode the generated output.
-        description = self.prompt_processor.batch_decode(outputs, skip_special_tokens=True)[0]
+        description = self.processor.batch_decode(outputs, skip_special_tokens=True)[0]
         # Extract the description after the "ASSISTANT:" token.
         description = description.split("ASSISTANT:")[-1].strip()
         
