@@ -57,7 +57,7 @@ def select_engine(engine_name):
     #     from engines.smolvlm500 import SmolVLM500Engine
     #     return SmolVLM500Engine()
     elif engine_name == "llava_video":
-        from NewbornActivityRecognition.engines.llavavideo import VideoLLavaEngine
+        from engines.llavavideo import VideoLLavaEngine
         return VideoLLavaEngine()
     elif engine_name == "janus7b":
         from engines.janus7B import JanusProEngine
