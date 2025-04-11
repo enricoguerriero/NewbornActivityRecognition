@@ -16,6 +16,8 @@ class PromptEngine:
 
         torch.manual_seed(seed)
         
+        print(frames, flush=True)
+        
         prompt = self.prompt_definition(question, system_message, frames)
         
         inputs = self.processor(
