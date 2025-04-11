@@ -9,7 +9,7 @@ class PromptEngine:
     def process_frames(self, frames):
         pass
     
-    def prompt_definition(self, question, system_message):
+    def prompt_definition(self, question, system_message, frames):
         pass 
     
     def answer_question(self, frames, system_message, question, seed = 42, temperature = 0.1):
@@ -20,6 +20,7 @@ class PromptEngine:
         
         inputs = self.processor(
             text=prompt,
+            video = frames,
             return_tensors="pt"
         ).to(self.device)
         

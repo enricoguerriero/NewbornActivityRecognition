@@ -32,21 +32,7 @@ class VideoLLavaEngine(PromptEngine):
         Build the prompt text for a given question.
         Here, we follow the recommended prompt format for Video LLaVA.
         """
-        prompt = [
-            {
-                "role": "system",
-                "content": [
-                    {"type": "text", "text": system_message},
-                ],
-            },
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": question},
-                    {"type": "video", "video": frames},
-                ],
-            },
-        ]
+        prompt = f"<|system|>\n{system_message}\n<|user|>\n{question}\n<|video|>"
         
         return prompt
     
