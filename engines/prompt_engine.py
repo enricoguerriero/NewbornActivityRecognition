@@ -16,13 +16,10 @@ class PromptEngine:
 
         torch.manual_seed(seed)
         
-        prompt = self.prompt_definition(question, system_message)
-        
-        frames_input = self.process_frames(frames)
+        prompt = self.prompt_definition(question, system_message, frames)
         
         inputs = self.processor(
             text=prompt,
-            videos=frames_input,
             return_tensors="pt"
         ).to(self.device)
         

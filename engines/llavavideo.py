@@ -27,7 +27,7 @@ class VideoLLavaEngine(PromptEngine):
         self.model.eval()
         self.name = "llava_video"
     
-    def prompt_definition(self, question: str, system_message: str = "You are a helpful assistant."):
+    def prompt_definition(self, question: str, system_message: str = "You are a helpful assistant.", frames = None):
         """
         Build the prompt text for a given question.
         Here, we follow the recommended prompt format for Video LLaVA.
@@ -43,7 +43,7 @@ class VideoLLavaEngine(PromptEngine):
                 "role": "user",
                 "content": [
                     {"type": "text", "text": question},
-                    {"type": "video"},
+                    {"type": "video", "video": frames},
                 ],
             },
         ]
