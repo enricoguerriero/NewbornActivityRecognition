@@ -9,6 +9,7 @@ class VideoLLavaEngine(PromptEngine):
     as well as generating answers from prompts, with an interface similar to the SmolVLMEngine.
     """
     def __init__(self, checkpoint_path: str = None, base_model_id: str = "LanguageBind/Video-LLaVA-7B-hf", device=None):
+        super().__init__()
         self.device = torch.device(device) if device else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         
         # Load the processor and model

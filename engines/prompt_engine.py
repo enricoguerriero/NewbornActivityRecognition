@@ -1,9 +1,7 @@
 import torch
 
 class PromptEngine:
-    def __init__(self, output_dim):
-        self.output_dim = output_dim
-        # Here you could load a pre-trained prompt model or set up your prompt logic.
+    def __init__(self):
         self.name = "genericPromptEngine"
         
     def process_frames(self, frames):
