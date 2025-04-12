@@ -94,11 +94,12 @@ class PromptLLMModel(BaseVideoModel):
                     # Convert ground truth labels to strings for comparison.
                     gt_tensor = labels_batch[i]  
                     gt_tensor = (gt_tensor > 0.5).long()  # Convert to binary labels.
-                    gt_list = [str(int(val.item())) for val in gt_tensor]
+                    gt_list = [int(val.item()) for val in gt_tensor]
                     
                     # Obtain predictions from the prompt engine.
                     predictions, full_answer = self.prompt_engine.answer_question(frames_tensor, system_message, questions)
                     logger.debug(f"Predictions: {predictions}, Ground Truth: {gt_list}")
+                    logger.debug(f"Full Answer: {full_answer}")
                     predicted_values[clip_name] = full_answer
                     
                     try:
