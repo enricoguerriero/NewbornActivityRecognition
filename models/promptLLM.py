@@ -132,8 +132,8 @@ class PromptLLMModel(BaseVideoModel):
                     if logger is not None:
                         logger.debug(f"Predictions: {predictions}, Ground Truth: {gt_list}")
                     if wandb is not None:
-                        for idx, question in enumerate(questions):
-                            wandb.log({f"{question}_prediction": float(predictions[idx]), f"{question}_gt": float(gt_list[idx])})
+                        for idx in range(4):
+                            wandb.log({f"{idx}_prediction": float(predictions[idx]), f"{idx}_gt": float(gt_list[idx])})
         
         metrics = self.compute_metrics(topic_stats, logger, wandb)
             
