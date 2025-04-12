@@ -110,18 +110,21 @@ class PromptLLMModel(BaseVideoModel):
                             true_str = gt_list[idx].strip()
                             
                             # Update based on binary outcomes.
-                            if true_str == '1':
-                                if pred_str == '1':
+                            if true_str == 1:
+                                if pred_str == 1:
                                     topic_stats[question]['TP'] += 1
                                     topic_stats[question]['correct'] += 1
                                 else:
                                     topic_stats[question]['FN'] += 1
-                            elif true_str == '0':
-                                if pred_str == '0':
+                            elif true_str == 0:
+                                if pred_str == 0:
                                     topic_stats[question]['TN'] += 1
                                     topic_stats[question]['correct'] += 1
                                 else:
                                     topic_stats[question]['FP'] += 1
+                            if pred_str == 2:
+                                # for wrong format prediction
+                                topic_stats[question]['WF'] += 1
                     except:
                         logger.debug(f"Error processing predictions: {predictions}, Ground Truth: {gt_list}")
                         
@@ -141,19 +144,22 @@ class PromptLLMModel(BaseVideoModel):
         metrics = {}
         for question, stats in topic_stats.items():
             total = stats['total']
-            TP = stats['TP']
-            TN = stats['TN']
-            FP = stats['FP']
-            FN = stats['FN']
+            TP = stats.get('TP', 0)
+            TN = stats.get('TN', 0)
+            FP = stats.get('FP', 0)
+            FN = stats.get('FN', 0)
+            WF = stats.get('WF', 0)
             accuracy = (TP + TN) / total if total > 0 else 0.0
             precision = TP / (TP + FP) if (TP + FP) > 0 else 0.0
             recall = TP / (TP + FN) if (TP + FN) > 0 else 0.0
             f1 = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
+            wf_rate = WF / total if total > 0 else 0.0
             metrics[question] = {
                 'accuracy': accuracy,
                 'precision': precision,
                 'recall': recall,
-                'f1': f1
+                'f1': f1,
+                'wf_rate': wf_rate
             }
             
             if logger is not None:
@@ -166,7 +172,8 @@ class PromptLLMModel(BaseVideoModel):
                     f"{question}_accuracy": accuracy,
                     f"{question}_precision": precision,
                     f"{question}_recall": recall,
-                    f"{question}_f1": f1
+                    f"{question}_f1": f1,
+                    f"{question}_wf_rate": wf_rate
                 })
             
         return metrics
