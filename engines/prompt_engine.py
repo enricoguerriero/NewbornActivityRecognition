@@ -7,7 +7,7 @@ class PromptEngine:
     def process_frames(self, frames):
         pass
     
-    def prompt_definition(self, question, system_message, frames):
+    def prompt_definition(self, question, system_message, video = None):
         pass 
     
     def clean_answer(self, answer):
@@ -31,9 +31,9 @@ class PromptEngine:
 
         torch.manual_seed(seed)
         
-        prompt = self.prompt_definition(question, system_message)
-        
         video = self.process_frames(frames)
+        
+        prompt = self.prompt_definition(question, system_message, video)        
         
         inputs = self.processor(
             text=prompt,
