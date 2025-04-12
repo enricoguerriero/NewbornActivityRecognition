@@ -38,6 +38,7 @@ class PromptEngine:
         inputs = self.processor(
             text=prompt,
             videos = video,
+            images = video,
             return_tensors="pt"
         ).to(self.device)
         
