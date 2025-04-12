@@ -10,11 +10,26 @@ class PromptEngine:
     def prompt_definition(self, question, system_message, frames):
         pass 
     
+    def clean_answer(self, answer):
+        pass
+    
+    def get_predictions(self, answer):
+        """
+        Answer is a string with that structure:
+        '[0, 1, 0, 1]'
+        return the vector of predictions
+        """
+        try:
+            answer = answer.replace("[", "").replace("]", "").replace(" ", "")
+            predictions = list(map(int, answer.split(",")))
+        except:
+            predictions = [2, 2, 2, 2]
+        return predictions
+        
+    
     def answer_question(self, frames, system_message, question, seed = 42, temperature = 0.1):
 
         torch.manual_seed(seed)
-        
-        print(frames, flush=True)
         
         prompt = self.prompt_definition(question, system_message)
         
@@ -37,4 +52,8 @@ class PromptEngine:
         
         responses = self.processor.batch_decode(outputs, skip_special_tokens=True)[0]
         
-        print(responses, flush=True)
+        answer = self.clean_answer(responses)
+        
+        predictions = self.get_predictions(answer)
+        
+        return predictions, answer

@@ -41,6 +41,10 @@ class VideoLLavaEngine(PromptEngine):
         # transform from tensor to list of numpy arrays
         frames = [frame.cpu().numpy() for frame in frames]
         return frames
+    
+    def clean_answer(self, answer: str):
+        answer = answer.split("ASSISTANT:")[-1].strip()
+        return answer
         
     
     def answer_questions(self, video_list: list, questions: list, seed: int = 42, temperature: float = 0.1):
