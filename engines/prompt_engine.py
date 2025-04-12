@@ -22,6 +22,8 @@ class PromptEngine:
         try:
             answer = answer.replace("[", "").replace("]", "").replace(" ", "")
             predictions = list(map(int, answer.split(",")))
+            if len(predictions) != 4:
+                predictions = [2, 2, 2, 2]
         except:
             predictions = [2, 2, 2, 2]
         return predictions
