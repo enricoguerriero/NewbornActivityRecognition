@@ -37,13 +37,19 @@ class PromptEngine:
         
         prompt = self.prompt_definition(question, system_message, video)        
         
-        inputs = self.processor(
-            text=prompt,
-            videos = video,
-            images = video,
-            return_tensors="pt"
-        ).to(self.device)
-        
+        try:
+            inputs = self.processor(
+                text=prompt,
+                videos = video,
+                return_tensors="pt"
+            ).to(self.device)
+        except:
+            inputs = self.processor(
+                text=prompt,
+                images = video,
+                return_tensors="pt"
+            ).to(self.device)
+                    
         generate_kwargs = {
             "max_new_tokens": 100,
             "do_sample": False,
