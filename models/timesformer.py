@@ -345,7 +345,8 @@ class TimesformerModel(BaseVideoModel):
             path (str): Path to load the model from.
         """
         load_path = "models/saved/" + path + ".pt"
-        self.load_state_dict(torch.load(load_path))
+        # set weights only true
+        self.load_state_dict(torch.load(load_path, weights_only=True))
         
     def save_checkpoint(self, path, optimizer, epoch):
         """
