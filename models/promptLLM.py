@@ -80,16 +80,6 @@ class PromptLLMModel(BaseVideoModel):
                     # Extract the frames for the current sample.
                     frames_tensor = frames_batch[i]  # Shape: (num_frames, channels, height, width)
                     clip_name = clip_names[i]
-
-                    # # Convert each frame to a PIL image.
-                    # pil_images = []
-                    # for frame in frames_tensor:
-                    #     # Convert tensor to numpy array. Permute to (H, W, C) and cast to uint8.
-                    #     np_frame = frame.permute(1, 2, 0).cpu().numpy()
-                    #     # If the frame is not already in uint8, scale/clip accordingly.
-                    #     if np_frame.dtype != np.uint8:
-                    #         np_frame = (255 * np.clip(np_frame, 0, 1)).astype(np.uint8)
-                    #     pil_images.append(Image.fromarray(np_frame))
                     
                     # Convert ground truth labels to strings for comparison.
                     gt_tensor = labels_batch[i]  
@@ -100,7 +90,7 @@ class PromptLLMModel(BaseVideoModel):
                     predictions, full_answer = self.prompt_engine.answer_question(frames_tensor, system_message, questions)
                     logger.debug(f"Predictions: {predictions}, Ground Truth: {gt_list}")
                     logger.debug(f"Full Answer: {full_answer}")
-                    predicted_values[clip_name] = full_answer
+                    predicted_values[clip_name] = predictions
                     
                     try:
                         # Update statistics for each question.
@@ -218,3 +208,4 @@ class PromptLLMModel(BaseVideoModel):
                     if wandb is not None:
                         wandb.log({f"{clip_name}_description": description})
         return descriptions
+    
