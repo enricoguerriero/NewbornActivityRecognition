@@ -87,18 +87,21 @@ class PromptLLMModel(BaseVideoModel):
                     gt_list = [int(val.item()) for val in gt_tensor]
                     
                     # Obtain predictions from the prompt engine.
-                    predictions, full_answer = self.prompt_engine.answer_question(frames_tensor, system_message, questions)
+                    predictions = []
+                    for question in questions:
+                        prediction, full_answer = self.prompt_engine.answer_question(frames_tensor, system_message, question)
+                        predictions.append(prediction)
+                        logger.debug(f"Full Answer: {full_answer}")
                     logger.debug(f"Predictions: {predictions}, Ground Truth: {gt_list}")
-                    logger.debug(f"Full Answer: {full_answer}")
                     predicted_values[clip_name] = predictions
                     
                     try:
                         # Update statistics for each question.
                         for idx, question in enumerate(questions):
                             topic_stats[question]['total'] += 1
-                            pred_str = predictions[idx].strip()
-                            true_str = gt_list[idx].strip()
-                            
+                            pred_str = predictions[idx]
+                            true_str = gt_list[idx]
+                                                        
                             # Update based on binary outcomes.
                             if true_str == 1:
                                 if pred_str == 1:
@@ -169,43 +172,4 @@ class PromptLLMModel(BaseVideoModel):
         return metrics
 
 
-    def describe_without_training(self, dataloader: DataLoader, wandb=None):
-        """
-        Describe the scene without training the model.
-        
-        :param dataloader: DataLoader yielding video clip samples.
-        :param wandb: Optional wandb instance for logging.
-        :return: List of descriptions for each clip.
-        """
-        logger = logging.getLogger(f'{self.model_name}_describe')
-        
-        descriptions = []
-        
-        self.eval()
-        with torch.no_grad():
-            for batch in tqdm(dataloader, desc="Describing", unit="batch"):
-                # Expect batch as a dict with keys 'frames' and 'labels'.
-                frames_batch = batch['frames']
-                clip_names = batch['clip_name']
-                batch_size = frames_batch.size(0)
-                for i in range(batch_size):
-                    # Extract the frames for the current sample.
-                    frames_tensor = frames_batch[i]
-                    clip_name = clip_names[i]
-                    # Convert each frame to a PIL image.
-                    pil_images = []
-                    for frame in frames_tensor:
-                        # Convert tensor to numpy array. Permute to (H, W, C) and cast to uint8.
-                        np_frame = frame.permute(1, 2, 0).cpu().numpy()
-                        # If the frame is not already in uint8, scale/clip accordingly.
-                        if np_frame.dtype != np.uint8:
-                            np_frame = (255 * np.clip(np_frame, 0, 1)).astype(np.uint8)
-                        pil_images.append(Image.fromarray(np_frame))
-                    # Obtain description from the prompt engine.
-                    description = self.prompt_engine.describe_the_scene(pil_images)
-                    descriptions.append(description)
-                    logger.debug(f"Description: {description}")
-                    if wandb is not None:
-                        wandb.log({f"{clip_name}_description": description})
-        return descriptions
     

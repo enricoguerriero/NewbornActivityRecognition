@@ -13,7 +13,7 @@ class PromptEngine:
     def clean_answer(self, answer):
         pass
     
-    def get_predictions(self, answer):
+    def get_predictions_single_question(self, answer):
         """
         Answer is a string with that structure:
         '[0, 1, 0, 1]'
@@ -27,6 +27,21 @@ class PromptEngine:
         except:
             predictions = [2, 2, 2, 2]
         return predictions
+    
+    def get_prediction(self, answer):
+        """
+        Answer is a string starting with 'Yes' or 'No'
+        return 1 if 'Yes' elif 'No' return 0 else 2
+        """
+        try:
+            if answer.startswith("Yes"):
+                return 1
+            elif answer.startswith("No"):
+                return 0
+            else:
+                return 2
+        except:
+            return 2
         
     
     def answer_question(self, frames, system_message, question, seed = 42, temperature = 0.1):
@@ -63,6 +78,6 @@ class PromptEngine:
         
         answer = self.clean_answer(responses)
         
-        predictions = self.get_predictions(answer)
+        predictions = self.get_prediction(answer)
         
         return predictions, answer
