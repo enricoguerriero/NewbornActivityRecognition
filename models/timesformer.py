@@ -4,6 +4,7 @@ from models.basemodel import BaseVideoModel
 from tqdm import tqdm
 import logging
 import torch
+import numpy as np
 
 # Import useful metrics from scikit-learn
 from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, average_precision_score
@@ -78,41 +79,20 @@ class TimesformerModel(BaseVideoModel):
         # Ensure that the binary predictions and labels are integer types.
         all_labels = all_labels.astype(int)
         all_predictions = all_predictions.astype(int)
-
         metrics = {}
 
-        # Overall micro / macro scores
-        metrics["precision_micro"] = precision_score(all_labels, all_predictions, average="micro", zero_division=0)
-        metrics["recall_micro"] = recall_score(all_labels, all_predictions, average="micro", zero_division=0)
-        metrics["f1_micro"] = f1_score(all_labels, all_predictions, average="micro", zero_division=0)
-
-        metrics["precision_macro"] = precision_score(all_labels, all_predictions, average="macro", zero_division=0)
-        metrics["recall_macro"] = recall_score(all_labels, all_predictions, average="macro", zero_division=0)
-        metrics["f1_macro"] = f1_score(all_labels, all_predictions, average="macro", zero_division=0)
-
-        try:
-            metrics["roc_auc"] = roc_auc_score(all_labels, all_probs, average="macro")
-        except Exception as e:
-            metrics["roc_auc"] = None
-
-        try:
-            metrics["average_precision_micro"] = average_precision_score(all_labels, all_probs, average="micro")
-            metrics["average_precision_macro"] = average_precision_score(all_labels, all_probs, average="macro")
-        except Exception as e:
-            metrics["average_precision_micro"] = None
-            metrics["average_precision_macro"] = None
-
         # Compute per-event metrics
-        num_events = all_labels.shape[1]  # Assumes shape is (N, num_events)
+        num_events = all_labels.shape[1]  # for example, 4 events/questions
         per_event_metrics = {}
 
         for i in range(num_events):
-            # Extract and cast the values for event i
+            # Extract values for event i
             y_true = all_labels[:, i].astype(int)
             y_pred = all_predictions[:, i].astype(int)
-            y_probs = all_probs[:, i]  # Keep as float for probability-based scores
+            y_probs = all_probs[:, i]  # as floats for probability scores
 
             event_dict = {}
+            event_dict["accuracy"] = np.mean(y_true == y_pred)  # per-question accuracy
             event_dict["precision"] = precision_score(y_true, y_pred, zero_division=0)
             event_dict["recall"] = recall_score(y_true, y_pred, zero_division=0)
             event_dict["f1_score"] = f1_score(y_true, y_pred, zero_division=0)
@@ -257,12 +237,25 @@ class TimesformerModel(BaseVideoModel):
         
         extra_metrics = self.compute_metrics(all_preds_np, all_labels_np, all_probs_np)
         logger.debug(f"Test / Val Loss = {avg_loss:.4f} | Test / Val Acc = {accuracy:.2f}%")
+        
         if wandb:
+            # Log per-clip predictions and ground truth values.
             wandb.log({
                 "test_loss": avg_loss, 
                 "test_accuracy": accuracy, 
-                **extra_metrics
-            }) 
+                "test_clip_predictions": all_preds_tensor.tolist(),
+                "test_clip_ground_truth": all_labels_tensor.tolist()
+            })
+            
+            # Flatten and log per-question metrics (accuracy, precision, recall, F1)
+            for i, metrics_dict in extra_metrics["per_event"].items():
+                wandb.log({
+                    f"test_{i}_accuracy": metrics_dict["accuracy"],
+                    f"test_{i}_precision": metrics_dict["precision"],
+                    f"test_{i}_recall": metrics_dict["recall"],
+                    f"test_{i}_f1_score": metrics_dict["f1_score"],
+                })
+                
         return avg_loss, accuracy, extra_metrics
 
     def train_model(self, train_loader, optimizer, criterion, num_epochs, val_loader=None, wandb=None):
