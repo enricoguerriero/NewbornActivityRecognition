@@ -4,6 +4,6 @@ CONFIG = BASE_CONFIG.copy()
 
 CONFIG.update({
     "clip_length": 2,
-    "frames_per_second": 6,
+    "frames_per_second": 5,
     "overlap": 1,
 })
