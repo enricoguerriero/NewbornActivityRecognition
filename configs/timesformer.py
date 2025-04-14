@@ -4,6 +4,8 @@ CONFIG = BASE_CONFIG.copy()
 CONFIG.update({    
     # specific configurations for TimesFormer
     "target_size": (224, 224),
+    "clip_length": 3,
+    "overlap": 2,
     
     # training parameters
     "batch_size": 16,
