@@ -56,18 +56,20 @@ class PromptEngine:
             inputs = self.processor(
                 text=prompt,
                 videos = video,
-                return_tensors="pt"
+                return_tensors="pt",
+                do_rescale=False
             ).to(self.device)
         except:
             inputs = self.processor(
                 text=prompt,
                 images = video,
-                return_tensors="pt"
+                return_tensors="pt",
+                do_rescale=False
             ).to(self.device)
                     
         generate_kwargs = {
-            "max_new_tokens": 100,
-            "do_sample": False,
+            "max_new_tokens": 20,
+            "do_sample": True,
             "temperature": temperature,
             "use_cache": True,
         }

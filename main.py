@@ -9,10 +9,12 @@ def main():
     parser = ArgumentParser(description="Main function for video activity recognition.")
     parser.add_argument("--model_name", type=str, required=True, help="Name of the model to use.")
     parser.add_argument("--tasks", type=str, nargs='+', required=True, help="List of tasks to perform.")
+    parser.add_argument("--load_model", type=str, default=None, help="Path to the model to load.")
     args = parser.parse_args()
     
     model_name = args.model_name
     tasks = args.tasks
+    model_to_load = args.load_model
         
     setup_all_loggers(model_name, tasks)
     
@@ -27,6 +29,11 @@ def main():
     logger.info(f"Model: {model_name}")
     model = select_model(model_name)
     logger.info(f"Model initialized: {model_name}")
+    
+    if model_to_load:
+        logger.info(f"Loading model from: {model_to_load}")
+        model.load_model(model_to_load)
+        logger.info(f"Model loaded: {model_to_load}")
     
     wandb = wandb_session(CONFIG["wandb_project"], model_name, CONFIG)
     logger.info(f"Wandb session started: {CONFIG['wandb_project']} - {model_name}")

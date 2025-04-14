@@ -1,9 +1,9 @@
 BASE_CONFIG = {
     
     # data creation
-    "clip_length": 3,
+    "clip_length": 2,
     "frames_per_second": 8,
-    "overlap": 2,
+    "overlap": 1,
     "target_size": (256, 256),
     "event_categories": ["Baby visible", "Ventilation", "Stimulation", "Suction"],
    
