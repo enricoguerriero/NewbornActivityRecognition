@@ -1,3 +1,9 @@
 from .base_config import BASE_CONFIG
 
 CONFIG = BASE_CONFIG.copy()
+
+CONFIG.update({
+    "clip_length": 2,
+    "frames_per_second": 6,
+    "overlap": 1,
+})
