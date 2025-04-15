@@ -59,7 +59,7 @@ def select_engine(engine_name):
     elif engine_name == "llava_video":
         from engines.llavavideo import VideoLLavaEngine
         return VideoLLavaEngine()
-    elif engine_name == "janus7b":
+    elif engine_name == "janus":
         from engines.janus7B import JanusProEngine
         return JanusProEngine()
     # elif engine_name == "valley":
