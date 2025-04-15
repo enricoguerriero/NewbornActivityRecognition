@@ -30,10 +30,10 @@ class TimesformerModel(BaseVideoModel):
         self.device = device  
         self.threshold = threshold  # threshold for multi-label classification
 
-        self.image_processor = AutoImageProcessor.from_pretrained("facebook/timesformer-base-finetuned-k400")
+        self.image_processor = AutoImageProcessor.from_pretrained("facebook/timesformer-base-finetuned-ssv2")
         # Load a pretrained Timesformer for video classification.
         self.timesformer = TimesformerForVideoClassification.from_pretrained(
-            "facebook/timesformer-base-finetuned-k400"
+            "facebook/timesformer-base-finetuned-ssv2"
         )
         # Remove the original classification head.
         self.timesformer.classifier = nn.Identity()

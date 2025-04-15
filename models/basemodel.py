@@ -15,11 +15,6 @@ class BaseVideoModel(nn.Module):
     def __init__(self, device = "cuda", model_name: str = "baseModel"):
         super(BaseVideoModel, self).__init__()
         self.model_name = model_name
-        self.video_folder = "data/videos"
-        self.annotation_folder = "data/annotations"
-        self.output_folder = "data/processed/" + self.model_name
-        self.transform = None
-        self.image_processor = None
         self.device = torch.device(device)
         self.to(self.device)
         self.threshold = 0.5  # threshold for multi-label classification
