@@ -17,6 +17,8 @@ BASE_CONFIG = {
     "threshold": 0.5,
     "device": "cuda",
     "momentum": 0.9,
+    "early_stopping_patience": 5,
+    "early_stopping_delta": 0.001,
     
     # wandb
     "wandb_project": "newborn-activity-recognition",

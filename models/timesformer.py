@@ -5,6 +5,10 @@ from tqdm import tqdm
 import logging
 import torch
 import numpy as np
+from sklearn.metrics import confusion_matrix
+import matplotlib.pyplot as plt
+import seaborn as sns
+import os
 
 # Import useful metrics from scikit-learn
 from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, average_precision_score
@@ -242,9 +246,8 @@ class TimesformerModel(BaseVideoModel):
             # Log per-clip predictions and ground truth values.
             wandb.log({
                 "test_loss": avg_loss, 
-                "test_accuracy": accuracy, 
-                "test_clip_predictions": all_preds_tensor.tolist(),
-                "test_clip_ground_truth": all_labels_tensor.tolist()
+                "test_accuracy": accuracy,
+                "raw_probabilities": wandb.Histogram(all_probs_np.flatten()),
             })
             
             # Flatten and log per-question metrics (accuracy, precision, recall, F1)
@@ -256,18 +259,35 @@ class TimesformerModel(BaseVideoModel):
                     f"test_{i}_f1_score": metrics_dict["f1_score"],
                 })
                 
+                y_true = all_labels_np[:, i]
+                y_pred = all_preds_np[:, i]
+                cm = confusion_matrix(y_true, y_pred, labels=[0, 1])
+
+                # Plot the confusion matrix using seaborn heatmap
+                fig, ax = plt.subplots()
+                sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax)
+                ax.set_title(f"Confusion Matrix for Event {i}")
+                ax.set_xlabel("Predicted Label")
+                ax.set_ylabel("True Label")
+                wandb.log({f"confusion_matrix_event_{i}": wandb.Image(fig)})
+                plt.close(fig)
+                
         return avg_loss, accuracy, extra_metrics
 
-    def train_model(self, train_loader, optimizer, criterion, num_epochs, val_loader=None, wandb=None):
+    def train_model(self, train_loader, optimizer, criterion, num_epochs, val_loader=None, wandb=None,
+                early_stopping_patience=5, early_stopping_delta=0.0):
         """
-        Runs the full training cycle over multiple epochs.
+        Runs the full training cycle over multiple epochs with early stopping.
         
         Args:
             train_loader (DataLoader): DataLoader for training data.
             optimizer (torch.optim.Optimizer): Optimizer.
             criterion (torch.nn.Module): Loss function.
-            num_epochs (int): Number of epochs.
+            num_epochs (int): Maximum number of epochs.
             val_loader (DataLoader, optional): DataLoader for validation/test data.
+            wandb: Weights & Biases object for logging metrics.
+            early_stopping_patience (int): Number of epochs with no improvement after which training will be stopped.
+            early_stopping_delta (float): Minimum change in the monitored quantity to qualify as an improvement.
         
         Returns:
             history (dict): Training and validation loss, accuracy, and metric history.
@@ -281,6 +301,9 @@ class TimesformerModel(BaseVideoModel):
             "val_accuracy": [],
             "val_metrics": []
         }
+
+        best_val_loss = float('inf')
+        epochs_without_improvement = 0
 
         epoch_iter = tqdm(range(1, num_epochs + 1), desc="Training Epochs")
         for epoch in epoch_iter:
@@ -298,9 +321,22 @@ class TimesformerModel(BaseVideoModel):
                 history["val_metrics"].append(val_metrics)
                 log_message += (f" | Val Loss = {val_loss:.4f} | Val Acc = {val_accuracy:.2f}% | "
                                 f"Metrics: {val_metrics}")
+                
+                if val_loss < best_val_loss - early_stopping_delta:
+                    best_val_loss = val_loss
+                    epochs_without_improvement = 0
+                else:
+                    epochs_without_improvement += 1
+                    logger.info(f"No improvement in validation loss for {epochs_without_improvement} epoch(s).")
+                
+                # Stop training early if no improvement for a specified patience
+                if epochs_without_improvement >= early_stopping_patience:
+                    logger.info(f"Early stopping triggered after {epoch} epochs.")
+                    break
+                
             if logger:
                 logger.debug(log_message)
-            self.save_checkpoint("model", optimizer, epoch)
+            self.save_checkpoint(f"timesformer_{epoch}", optimizer, epoch)
             if wandb:
                 # Log all metrics
                 wandb.log({
@@ -315,7 +351,7 @@ class TimesformerModel(BaseVideoModel):
             epoch_iter.set_postfix_str(log_message)
             
         # Save the final model
-        self.save_model("model")
+        self.save_model("timesformer_final")
         
         return history
 
@@ -337,7 +373,7 @@ class TimesformerModel(BaseVideoModel):
         Args:
             path (str): Path to load the model from.
         """
-        load_path = "models/saved/" + path + ".pt"
+        load_path = os.path.join("models/saved", path + ".pt")
         # set weights only true
         self.load_state_dict(torch.load(load_path, weights_only=True))
         
@@ -350,7 +386,7 @@ class TimesformerModel(BaseVideoModel):
             optimizer (torch.optim.Optimizer): Optimizer.
             epoch (int): Current epoch.
         """
-        save_path = "models/saved/checkpoints/" + path + ".pt"
+        save_path = os.path.join("models/saved", path + "_checkpoint.pt")
         torch.save({
             'epoch': epoch,
             'model_state_dict': self.state_dict(),

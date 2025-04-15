@@ -83,7 +83,9 @@ def main():
                     criterion = model.define_criterion(CONFIG["criterion"]),
                     num_epochs = CONFIG["epochs"],
                     val_loader = validation_loader,
-                    wandb = wandb)
+                    wandb = wandb,
+                    early_stopping_patience = CONFIG["early_stopping_patience"],
+                    early_stopping_delta = CONFIG["early_stopping_delta"])
         logger.info(f"History: {history}")
 
     if "test" in tasks:
