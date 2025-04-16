@@ -23,7 +23,7 @@ class VideoLlavaClassifier(BaseVideoModel):
             ).to(self.device)
 
         # Assume the embedding size comes from the base language model inside
-        hidden_size = self.model.config.hidden_size
+        hidden_size = self.model.get_input_embeddings().embedding_dim
 
         self.classifier = nn.Sequential(
             nn.Linear(hidden_size, 512),
