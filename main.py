@@ -87,8 +87,12 @@ def main():
             pos_weights, neg_weights = None, None
         logger.info("...Training the model...")
         history = model.train_model(train_loader = train_loader, 
-                    optimizer = model.define_optimizer(CONFIG["optimizer"], CONFIG["learning_rate"], CONFIG["momentum"]),
-                    criterion = model.define_criterion(CONFIG["criterion"], pos_weight=pos_weights, neg_weight=neg_weights),
+                    optimizer = model.define_optimizer(CONFIG["optimizer"],
+                                                       CONFIG["learning_rate"], 
+                                                       CONFIG["momentum"]),
+                    criterion = model.define_criterion(CONFIG["criterion"],
+                                                       pos_weight=pos_weights.to(model.device), 
+                                                       neg_weight=neg_weights.to(model.device)),
                     num_epochs = CONFIG["epochs"],
                     val_loader = validation_loader,
                     wandb = wandb,
