@@ -41,6 +41,9 @@ def select_model(model_name):
     if model_name == "timesformer":
         from models.timesformer import TimesformerModel
         return TimesformerModel()
+    elif model_name == "llavavideo_classifier":
+        from models.llavavideo_classifier import VideoLlavaClassifier
+        return VideoLlavaClassifier()
     else:
         from models.promptLLM import PromptLLMModel
         engine = select_engine(model_name)
