@@ -20,6 +20,18 @@ BASE_CONFIG = {
     "early_stopping_patience": 5,
     "early_stopping_delta": 0.001,
     
+    # training parameters for vlm
+    "per_device_train_batch_size": 2,
+    "per_device_eval_batch_size": 2,
+    "gradient_accumulation_steps": 2,
+    "num_train_epochs": 5,
+    "learning_rate": 2e-5,
+    "logging_dir": "logs",
+    "evaluation_strategy": "epoch",
+    "save_strategy": "epoch",
+    "fp16": True,
+    "report_to": "none",
+    
     # wandb
     "wandb_project": "newborn-activity-recognition",
     

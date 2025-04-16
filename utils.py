@@ -1,6 +1,7 @@
 import logging
 import wandb
 import importlib
+import torch
 
 def load_config(model_name):
     try:
@@ -71,3 +72,11 @@ def select_engine(engine_name):
 def wandb_session(project_name, model_name, config):
     wandb.init(project=project_name + " - " + model_name, config=config)
     return wandb
+
+def collate_fn(batch):
+    return {
+        "input_ids": torch.stack([item["input_ids"] for item in batch]),
+        "attention_mask": torch.stack([item["attention_mask"] for item in batch]),
+        "pixel_values": torch.stack([item["pixel_values"] for item in batch]),
+        "labels": torch.stack([item["labels"] for item in batch]),
+    }
