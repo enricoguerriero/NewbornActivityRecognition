@@ -1,11 +1,8 @@
 import os
 import torch
 import torch.nn as nn
-from torch.utils.data import Dataset
-from PIL import Image
 from transformers import VideoLlavaProcessor, VideoLlavaForConditionalGeneration, TrainingArguments, Trainer
-from torchvision import transforms
-import pandas as pd
+from data.vlm_dataset import ClipDataset
 
 # 👇 Modify this
 NUM_CLASSES = 4
@@ -41,36 +38,7 @@ class VideoLlavaClassifier(VideoLlavaForConditionalGeneration):
 
         return {"loss": loss, "logits": logits}
 
-class ClipDataset(Dataset):
-    def __init__(self, csv_file, processor, prompt=FIXED_PROMPT, frame_limit=8):
-        self.data = pd.read_csv(csv_file)
-        self.processor = processor
-        self.prompt = prompt
-        self.frame_limit = frame_limit
-        self.transform = transforms.Compose([
-            transforms.Resize((224, 224)),
-            transforms.ToTensor()
-        ])
 
-    def __len__(self):
-        return len(self.data)
-
-    def load_frames(self, video_path):
-        frames = sorted(os.listdir(video_path))[:self.frame_limit]
-        images = [self.transform(Image.open(os.path.join(video_path, f)).convert("RGB")) for f in frames]
-        return images
-
-    def __getitem__(self, idx):
-        row = self.data.iloc[idx]
-        frames = self.load_frames(row['video_path'])
-        inputs = self.processor(text=self.prompt, images=frames, return_tensors="pt", padding=True)
-
-        return {
-            "input_ids": inputs["input_ids"].squeeze(0),
-            "attention_mask": inputs["attention_mask"].squeeze(0),
-            "pixel_values": inputs["pixel_values"].squeeze(0),
-            "labels": torch.tensor(row['label'], dtype=torch.long)
-        }
 
 def collate_fn(batch):
     return {

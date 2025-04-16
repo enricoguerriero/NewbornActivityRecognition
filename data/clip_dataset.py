@@ -69,8 +69,8 @@ class VideoDataset(Dataset):
         # Load frames from precomputed tensors if available; otherwise, load from video file.
         if self.video_tensors is not None:
             frames = self.load_frames_from_tensors(video, clip_idx)
-        else:
-            frames = self.load_frames(video_path, clip_idx)
+        # else:
+        #     frames = self.load_frames(video_path, clip_idx)
         labels = self.load_labels(annotation_path, clip_idx)
         
         frames = pad_or_truncate(frames, length=int(self.clip_length * self.frames_per_second))
@@ -82,45 +82,45 @@ class VideoDataset(Dataset):
         self.cache[clip_name] = clip_data
         return clip_data
     
-    def load_frames(self, video_path, clip_idx):
-        """
-        Load frames from a video clip file.
-        """
-        cap = cv2.VideoCapture(video_path)
-        if not cap.isOpened():
-            print(f"Error opening video file: {video_path}", flush=True)
-            return None
-        fps = cap.get(cv2.CAP_PROP_FPS)
-        start_frame = int(clip_idx * fps * (self.clip_length - self.overlapping))
-        end_frame = int(start_frame + (self.clip_length * fps))
-        frame_interval = int(round(fps / self.frames_per_second))
-        frames = []
-        frame_index = 0
+    # def load_frames(self, video_path, clip_idx):
+    #     """
+    #     Load frames from a video clip file.
+    #     """
+    #     cap = cv2.VideoCapture(video_path)
+    #     if not cap.isOpened():
+    #         print(f"Error opening video file: {video_path}", flush=True)
+    #         return None
+    #     fps = cap.get(cv2.CAP_PROP_FPS)
+    #     start_frame = int(clip_idx * fps * (self.clip_length - self.overlapping))
+    #     end_frame = int(start_frame + (self.clip_length * fps))
+    #     frame_interval = int(round(fps / self.frames_per_second))
+    #     frames = []
+    #     frame_index = 0
         
-        transform = transforms.Compose([
-            transforms.ToPILImage(),
-            LeftCrop(self.size),
-            transforms.Resize(self.size),  
-            transforms.ToTensor()
-        ])
+    #     transform = transforms.Compose([
+    #         transforms.ToPILImage(),
+    #         LeftCrop(self.size),
+    #         transforms.Resize(self.size),  
+    #         transforms.ToTensor()
+    #     ])
         
-        while True:
-            ret, frame = cap.read()
-            if not ret:
-                break
-            if frame_index % frame_interval == 0 and frame_index >= start_frame:
-                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                frame = transform(frame)
-                frames.append(frame)
-            frame_index += 1
-            if frame_index >= end_frame:
-                break
-        cap.release()
-        if frames:
-            frames = torch.stack(frames)
-        else:
-            frames = None            
-        return frames
+    #     while True:
+    #         ret, frame = cap.read()
+    #         if not ret:
+    #             break
+    #         if frame_index % frame_interval == 0 and frame_index >= start_frame:
+    #             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    #             frame = transform(frame)
+    #             frames.append(frame)
+    #         frame_index += 1
+    #         if frame_index >= end_frame:
+    #             break
+    #     cap.release()
+    #     if frames:
+    #         frames = torch.stack(frames)
+    #     else:
+    #         frames = None            
+    #     return frames
     
     def load_frames_from_tensors(self, video, clip_idx):
         """
@@ -230,7 +230,7 @@ class VideoDataset(Dataset):
                 if frame_index % frame_interval == 0:
                     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     if self.processor is not None:
-                        frame = self.processor(images=frame, return_tensors="pt")["pixel_values"][0]
+                        frame = self.processor(images=frame, return_tensors="pt")["pixel_values"][0].squeeze(0)
                     else:
                         frame = transform(frame)
                     frames.append(frame)

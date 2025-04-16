@@ -1,6 +1,7 @@
 from utils import setup_all_loggers, select_model, wandb_session, load_config
 import logging
 from data.clip_dataset import VideoDataset
+from data.vlm_dataset import ClipDataset
 import os
 from argparse import ArgumentParser
 
@@ -75,9 +76,6 @@ def main():
     test_loader = test_data.get_data_loader(CONFIG["batch_size"], CONFIG["num_workers"]) if "test" or "untrained_test" in tasks else None
     
     logger.info("...Data loaded...")
-        
-    if "export" in tasks:
-        pass
     
     if "train" in tasks:
         if CONFIG["criterion"] == "wbce":
@@ -112,6 +110,14 @@ def main():
                                                system_message = CONFIG["system_message"], 
                                                wandb = wandb)
         logger.info(f"History: {history}")
+
+
+    if "finetune" in tasks:
+        logger.info("...Fine-tuning the model...")
+        logger.info(f"Fine-tuning with the following configuration: {CONFIG}")
+        logger.info("Creating the dataset for fine-tuning...")
+        train_dataset = ClipDataset(video_dataset=train_data, processor=model.image_processor)
+        val_dataset = ClipDataset(video_dataset=validation_data, processor=model.image_processor)
 
 
     logger.info("...Exiting the main function...")
