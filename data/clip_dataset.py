@@ -10,7 +10,7 @@ class VideoDataset(Dataset):
     def __init__(self, video_folder: str, annotation_folder: str, 
                  clip_length: float, overlapping: float, size: tuple, 
                  frames_per_second: int, tensors=False, event_categories: list[str] = [],
-                 exploring: bool = False):
+                 exploring: bool = False, processor = None):
         self.video_folder = video_folder
         self.video_list = sorted(os.listdir(video_folder))
         self.annotation_folder = annotation_folder
@@ -19,38 +19,11 @@ class VideoDataset(Dataset):
         self.overlapping = overlapping
         self.size = size
         self.frames_per_second = frames_per_second
+        self.processor = processor
         self.video_tensors = None
         if tensors:
             # Transform the entire videos now and store them as tensors.
-            self.video_tensors = {}
-            for video in tqdm(self.video_list, desc="Transforming videos into tensors"):
-                video_path = os.path.join(video_folder, video)
-                cap = cv2.VideoCapture(video_path)    
-                frames = []
-                fps = cap.get(cv2.CAP_PROP_FPS)
-                frame_interval = int(round(fps / self.frames_per_second))
-                if frame_interval < 1:
-                    frame_interval = 1
-                transform = transforms.Compose([
-                    transforms.ToPILImage(),
-                    LeftCrop(self.size),  
-                    transforms.Resize(self.size),  
-                    transforms.ToTensor()
-                ])
-                frame_index = 0
-                while True:
-                    ret, frame = cap.read()
-                    if not ret:
-                        break
-                    if frame_index % frame_interval == 0:
-                        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                        frame = transform(frame)
-                        frames.append(frame)
-                    frame_index += 1
-                if frames:
-                    video_tensor = torch.stack(frames)
-                    self.video_tensors[video] = video_tensor
-                cap.release()
+            self.store_tensors()
                 
         self.event_categories = event_categories if event_categories else ["Baby visible", "Ventilation", "Stimulation", "Suction"]
         
@@ -61,23 +34,8 @@ class VideoDataset(Dataset):
         # Dummy cache system to store previously loaded clips.
         self.cache = {}
         
-        # Precompute the mapping of global indices to (video_idx, clip_idx).
-        # This handles videos with different lengths.
-        self.index_mapping = []
-        for video_idx, video in enumerate(self.video_list):
-            video_path = os.path.join(video_folder, video)
-            cap = cv2.VideoCapture(video_path)
-            if not cap.isOpened():
-                continue
-            fps = cap.get(cv2.CAP_PROP_FPS)
-            num_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-            video_length = num_frames / fps if fps > 0 else 0
-            # Compute how many clips can be extracted
-            num_clips = max(0, int((video_length - (self.clip_length - self.overlapping)) / (self.clip_length - self.overlapping)))
-            for clip_idx in range(num_clips):
-                self.index_mapping.append((video_idx, clip_idx))
-            cap.release()
-            
+        self.index_mapping = self.index_mapping_creation()
+        
     def __len__(self):
         # Total number of clips computed from all videos.
         return len(self.index_mapping)
@@ -123,7 +81,7 @@ class VideoDataset(Dataset):
         }
         self.cache[clip_name] = clip_data
         return clip_data
-
+    
     def load_frames(self, video_path, clip_idx):
         """
         Load frames from a video clip file.
@@ -246,3 +204,88 @@ class VideoDataset(Dataset):
         Returns a DataLoader instance for the current dataset.
         """
         return DataLoader(self, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
+
+    def store_tensors(self):
+        
+        self.video_tensors = {}
+        for video in tqdm(self.video_list, desc="Transforming videos into tensors"):
+            video_path = os.path.join(self.video_folder, video)
+            cap = cv2.VideoCapture(video_path)    
+            frames = []
+            fps = cap.get(cv2.CAP_PROP_FPS)
+            frame_interval = int(round(fps / self.frames_per_second))
+            if frame_interval < 1:
+                frame_interval = 1
+            transform = transforms.Compose([
+                transforms.ToPILImage(),
+                LeftCrop(self.size),  
+                transforms.Resize(self.size),  
+                transforms.ToTensor()
+            ])
+            frame_index = 0
+            while True:
+                ret, frame = cap.read()
+                if not ret:
+                    break
+                if frame_index % frame_interval == 0:
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    if self.processor is not None:
+                        frame = self.processor(images=frame, return_tensors="pt")["pixel_values"][0]
+                    else:
+                        frame = transform(frame)
+                    frames.append(frame)
+                frame_index += 1
+            cap.release()
+            if frames:
+                video_tensor = torch.stack(frames)
+                self.video_tensors[video] = video_tensor
+            
+    def index_mapping_creation(self):
+        
+        index_mapping = []
+        
+        for video_idx, video in enumerate(self.video_list):
+            video_path = os.path.join(self.video_folder, video)
+            cap = cv2.VideoCapture(video_path)
+            if not cap.isOpened():
+                continue
+            fps = cap.get(cv2.CAP_PROP_FPS)
+            num_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            video_length = num_frames / fps if fps > 0 else 0
+            # Compute how many clips can be extracted
+            num_clips = max(0, int((video_length - (self.clip_length - self.overlapping)) / (self.clip_length - self.overlapping)))
+            for clip_idx in range(num_clips):
+                index_mapping.append((video_idx, clip_idx))
+            cap.release()
+        return index_mapping
+
+    def weight_computation(self):
+        """
+        Computes per-class weights for positive and negative examples by iterating
+        over the dataset and aggregating the 'labels' from each sample.
+        
+        Returns:
+            pos_weight (torch.Tensor): A tensor of shape (n_classes,) containing the 
+                                    weight for positive examples per class.
+            neg_weight (torch.Tensor): A tensor of shape (n_classes,) containing the 
+                                    weight for negative examples per class.
+        """
+        eps = 1e-7  # small constant to avoid division by zero
+        labels_list = []
+        
+        for i in range(len(self)):
+            sample = self[i]
+            labels_list.append(sample['labels'])
+        
+        labels_tensor = torch.stack(labels_list)
+        
+        pos_counts = torch.sum(labels_tensor, dim=0)
+        
+        total_samples = labels_tensor.shape[0]
+        neg_counts = total_samples - pos_counts
+        
+        pos_weight = neg_counts.float() / (pos_counts.float() + eps)
+        
+        neg_weight = pos_counts.float() / (neg_counts.float() + eps)
+        
+        return pos_weight, neg_weight

@@ -9,6 +9,7 @@ from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
+from torch.optim.lr_scheduler import StepLR
 
 # Import useful metrics from scikit-learn
 from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, average_precision_score
@@ -304,6 +305,7 @@ class TimesformerModel(BaseVideoModel):
 
         best_val_loss = float('inf')
         epochs_without_improvement = 0
+        scheduler = StepLR(optimizer, step_size=10, gamma=0.1)
 
         epoch_iter = tqdm(range(1, num_epochs + 1), desc="Training Epochs")
         for epoch in epoch_iter:
@@ -334,6 +336,8 @@ class TimesformerModel(BaseVideoModel):
                     logger.info(f"Early stopping triggered after {epoch} epochs.")
                     break
                 
+            scheduler.step()
+            
             if logger:
                 logger.debug(log_message)
             self.save_checkpoint(f"timesformer_{epoch}", optimizer, epoch)

@@ -6,6 +6,7 @@ from torchvision.transforms import transforms
 import cv2
 import numpy as np
 import torch
+from .wBCE import WeightedBCELoss
 
 class BaseVideoModel(nn.Module):
     """
@@ -29,7 +30,7 @@ class BaseVideoModel(nn.Module):
         """
         raise NotImplementedError("Subclasses must implement modify_last_layer().")
         
-    def define_optimizer(self, optimizer_name, learning_rate, momentum):
+    def define_optimizer(self, optimizer_name, learning_rate, momentum = None, weight_decay = None):
         """
         Defines the optimizer for the model.
         By now you can choose between Adam and SGD.
@@ -37,12 +38,14 @@ class BaseVideoModel(nn.Module):
         if optimizer_name == "adam":
             optimizer = torch.optim.Adam(self.parameters(), lr=learning_rate)
         elif optimizer_name == "sgd":
-            optimizer = torch.optim.SGD(self.parameters(), lr=learning_rate, momentum=momentum)
+            optimizer = torch.optim.SGD(self.parameters(), lr=learning_rate, momentum=momentum, weight_decay=weight_decay)
+        elif optimizer_name == "adamw":
+            optimizer = torch.optim.AdamW(self.parameters(), lr=learning_rate, weight_decay=weight_decay)
         else:
             raise ValueError(f"Optimizer {optimizer_name} not available")
         return optimizer
     
-    def define_criterion(self, criterion_name):
+    def define_criterion(self, criterion_name, pos_weight=None, neg_weight=None):
         """
         Defines the criterion for the model.
         By now you can choose between BCE and CrossEntropy.
@@ -51,6 +54,8 @@ class BaseVideoModel(nn.Module):
             criterion = torch.nn.BCEWithLogitsLoss()
         elif criterion_name == "crossentropy":
             criterion = torch.nn.CrossEntropyLoss()
+        elif criterion_name == "wbce":
+            criterion = WeightedBCELoss(pos_weight=pos_weight, neg_weight=neg_weight)
         else:
             raise ValueError(f"Criterion {criterion_name} not available")
         return criterion
