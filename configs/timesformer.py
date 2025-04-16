@@ -13,7 +13,7 @@ CONFIG.update({
     "epochs": 10,
     "learning_rate": 0.005,
     "optimizer": "adam",
-    "criterion": "bce",
+    "criterion": "wbce",
     "threshold": 0.5,
     "device": "cuda",
     "momentum": 0.9,
