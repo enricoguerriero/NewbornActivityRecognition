@@ -1,4 +1,4 @@
-from utils import setup_all_loggers, select_model, wandb_session, load_config
+from utils import setup_all_loggers, select_model, wandb_session, load_config, collate_fn
 import logging
 from data.clip_dataset import VideoDataset
 from data.vlm_dataset import ClipDataset
@@ -122,6 +122,21 @@ def main():
         logger.info("Creating the dataset for fine-tuning...")
         train_dataset = ClipDataset(video_dataset=train_data, processor=model.image_processor)
         val_dataset = ClipDataset(video_dataset=validation_data, processor=model.image_processor)
+        logger.info("Fine-tuning the model...")
+        model.train_model(train_dataset = train_dataset,
+                          val_dataset = val_dataset,
+                          data_collator = collate_fn,
+                          output_dir = CONFIG["output_dir"],
+                          per_device_train_batch_size = CONFIG["batch_size"],
+                          per_device_eval_batch_size = CONFIG["batch_size"],
+                          gradient_accumulation_steps = CONFIG["gradient_accumulation_steps"],
+                          num_train_epochs = CONFIG["num_train_epochs"],
+                          learning_rate = CONFIG["learning_rate"],
+                          logging_dir = CONFIG["logging_dir"],
+                          evaluation_strategy = CONFIG["evaluation_strategy"],
+                          save_strategy = CONFIG["save_strategy"],
+                          fp16 = CONFIG["fp16"],
+                          report_to = wandb)
 
 
     logger.info("...Exiting the main function...")

@@ -31,6 +31,8 @@ class VideoLlavaClassifier(BaseVideoModel):
             nn.Dropout(0.1),
             nn.Linear(512, num_classes)
         )
+        
+        self.image_processor = None
 
     def forward(self, pixel_values=None, input_ids=None, attention_mask=None, labels=None):
         outputs = self.model(
