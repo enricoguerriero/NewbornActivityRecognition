@@ -51,7 +51,7 @@ def main():
                               size = CONFIG["target_size"],
                               tensors = True,
                               event_categories = CONFIG["event_categories"],
-                              processor = model.image_processor) if "train" in tasks else None
+                              processor = model.image_processor) if "train" or "finetune" in tasks else None
     validation_data = VideoDataset(video_folder = os.path.join(CONFIG["video_folder"], "validation"),
                                    annotation_folder = os.path.join(CONFIG["annotation_folder"], "validation"),
                                    clip_length = CONFIG["clip_length"],
@@ -60,7 +60,7 @@ def main():
                                    size = CONFIG["target_size"],
                                    tensors = True,
                                    event_categories = CONFIG["event_categories"],
-                                   processor = model.image_processor) if "train" in tasks else None
+                                   processor = model.image_processor) if "train" or "finetune" in tasks else None
     test_data = VideoDataset(video_folder = os.path.join(CONFIG["video_folder"], "test"),
                               annotation_folder = os.path.join(CONFIG["annotation_folder"], "test"),
                               clip_length = CONFIG["clip_length"],
@@ -71,8 +71,8 @@ def main():
                               event_categories = CONFIG["event_categories"],
                               processor = model.image_processor) if "test" or "untrained_test" in tasks else None
     
-    train_loader = train_data.get_data_loader(CONFIG["batch_size"], CONFIG["num_workers"]) if "train" in tasks else None
-    validation_loader = validation_data.get_data_loader(CONFIG["batch_size"], CONFIG["num_workers"]) if "train" in tasks else None
+    train_loader = train_data.get_data_loader(CONFIG["batch_size"], CONFIG["num_workers"]) if "train" or "finetune" in tasks else None
+    validation_loader = validation_data.get_data_loader(CONFIG["batch_size"], CONFIG["num_workers"]) if "train" or "finetune" in tasks else None
     test_loader = test_data.get_data_loader(CONFIG["batch_size"], CONFIG["num_workers"]) if "test" or "untrained_test" in tasks else None
     
     logger.info("...Data loaded...")
