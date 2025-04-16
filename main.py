@@ -124,7 +124,7 @@ def main():
         val_dataset = ClipDataset(video_dataset=validation_data, processor=model.image_processor)
         logger.info("Fine-tuning the model...")
         model.train_model(train_dataset = train_dataset,
-                          val_dataset = val_dataset,
+                          eval_dataset = val_dataset,
                           data_collator = collate_fn,
                           output_dir = CONFIG["output_dir"],
                           per_device_train_batch_size = CONFIG["batch_size"],
