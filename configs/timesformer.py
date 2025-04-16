@@ -10,7 +10,7 @@ CONFIG.update({
     # training parameters
     "batch_size": 16,
     "num_workers": 1,
-    "epochs": 10,
+    "epochs": 50,
     "learning_rate": 0.005,
     "optimizer": "adam",
     "criterion": "wbce",
