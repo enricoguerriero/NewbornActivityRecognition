@@ -30,6 +30,9 @@ def main():
     logger.info(f"Model: {model_name}")
     model = select_model(model_name)
     logger.info(f"Model initialized: {model_name}")
+    trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    total     = sum(p.numel() for p in model.parameters())
+    print(f"Trainable params: {trainable:,} / {total:,}  ({100*trainable/total:.2f}%)", flush = True)
     
     if model_to_load:
         logger.info(f"Loading model from: {model_to_load}")
