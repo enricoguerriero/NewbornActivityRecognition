@@ -132,8 +132,14 @@ def main():
         logger.info("...Fine-tuning the model...")
         logger.info(f"Fine-tuning with the following configuration: {CONFIG}")
         logger.info("Creating the dataset for fine-tuning...")
-        train_dataset = ClipDataset(video_dataset=train_data, processor=model.image_processor)
-        val_dataset = ClipDataset(video_dataset=validation_data, processor=model.image_processor)
+        train_dataset = ClipDataset(video_dataset=train_data,
+                                    prompt = model.prompt_definition(system_message = CONFIG["system_message"],
+                                                                    question = CONFIG["question"]),
+                                    processor=model.image_processor)
+        val_dataset = ClipDataset(video_dataset=validation_data, 
+                                  prompt = model.prompt_definition(system_message = CONFIG["system_message"],
+                                                                  question = CONFIG["question"]),
+                                  processor=model.image_processor)
         logger.info("Fine-tuning the model...")
         model.train_model(train_dataset = train_dataset,
                           eval_dataset = val_dataset,

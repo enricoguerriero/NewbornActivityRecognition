@@ -95,3 +95,15 @@ class VideoLlavaClassifier(BaseVideoModel):
         )
         trainer.train()
         trainer.save_model(output_dir)
+        trainer.evaluate(eval_dataset)
+        trainer.save_model(output_dir)
+        return trainer
+        
+    def prompt_definition(self, question: str, system_message: str = "You are a helpful assistant.", video: list = None):
+        """
+        Build the prompt text for a given question.
+        Here, we follow the recommended prompt format for Video LLaVA.
+        """
+        prompt = f"USER: <video>\n{system_message}\n{question}\nASSISTANT:"
+        
+        return prompt

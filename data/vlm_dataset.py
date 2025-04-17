@@ -9,6 +9,8 @@ class ClipDataset(Dataset):
         super().__init__()
         
         self.video_dataset = video_dataset
+        self.processor = processor
+        self.prompt = prompt
         
     def __len__(self):
         return len(self.video_dataset)
