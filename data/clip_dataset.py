@@ -10,11 +10,12 @@ class VideoDataset(Dataset):
     def __init__(self, video_folder: str, annotation_folder: str, 
                  clip_length: float, overlapping: float, size: tuple, 
                  frames_per_second: int, tensors=False, event_categories: list[str] = [],
-                 exploring: bool = False, processor = None):
+                 exploring: bool = False, processor = None, model_name = None, tensor_folder = None):
         self.video_folder = video_folder
         self.video_list = sorted(os.listdir(video_folder))
         self.annotation_folder = annotation_folder
         self.annotation_list = sorted(os.listdir(annotation_folder))
+        self.tensor_folder = tensor_folder
         self.clip_length = clip_length
         self.overlapping = overlapping
         self.size = size
@@ -22,8 +23,8 @@ class VideoDataset(Dataset):
         self.processor = processor
         self.video_tensors = None
         if tensors:
-            # Transform the entire videos now and store them as tensors.
-            self.store_tensors()
+            # Check if the video tensors already exist and load them.
+            self.get_video_tensors(model_name)
                 
         self.event_categories = event_categories if event_categories else ["Baby visible", "Ventilation", "Stimulation", "Suction"]
         
@@ -289,3 +290,18 @@ class VideoDataset(Dataset):
         neg_weight = pos_counts.float() / (neg_counts.float() + eps)
         
         return pos_weight, neg_weight
+
+
+    def get_video_tensors(self, model_name):
+        
+        # Check if the tensors already exist
+        video_tensors_path = os.path.join(self.tensor_folder, model_name)
+        if os.path.exists(video_tensors_path):
+            self.video_tensors = torch.load(video_tensors_path)
+            return
+        # If not, create the directory and initialize the tensors
+        os.makedirs(video_tensors_path, exist_ok=True)
+        self.video_tensors = {}
+        self.store_tensors()
+        # Save the tensors to disk
+        torch.save(self.video_tensors, video_tensors_path)

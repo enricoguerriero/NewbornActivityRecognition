@@ -38,6 +38,7 @@ BASE_CONFIG = {
     # folder structure
     "video_folder": "data/videos",
     "annotation_folder": "data/annotations",
+    "tensor_folder": "data/tensors",
     
     # prompts
     "system_message": """
