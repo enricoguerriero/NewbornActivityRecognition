@@ -70,5 +70,15 @@ class SmolVLMEngine(PromptEngine):
     def clean_answer(self, answer):
         return answer.split("Assistant:")[-1].strip()
     
+    def process_input(self, prompt, video):
+        return self.processor(
+            text = prompt,
+            images=video,
+            return_tensors="pt",
+            padding=True,
+            truncation=True
+        ).to(self.device)
+    
+    
 
     
