@@ -36,11 +36,14 @@ class BaseVideoModel(nn.Module):
         By now you can choose between Adam and SGD.
         """
         if optimizer_name == "adam":
-            optimizer = torch.optim.Adam(self.parameters(), lr=learning_rate)
+            optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.parameters()),
+                                         lr=learning_rate)
         elif optimizer_name == "sgd":
-            optimizer = torch.optim.SGD(self.parameters(), lr=learning_rate, momentum=momentum, weight_decay=weight_decay)
+            optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad, self.parameters()),
+                                        lr=learning_rate, momentum=momentum, weight_decay=weight_decay)
         elif optimizer_name == "adamw":
-            optimizer = torch.optim.AdamW(self.parameters(), lr=learning_rate, weight_decay=weight_decay)
+            optimizer = torch.optim.AdamW(filter(lambda p: p.requires_grad, self.parameters()),
+                                          lr=learning_rate, weight_decay=weight_decay)
         else:
             raise ValueError(f"Optimizer {optimizer_name} not available")
         return optimizer

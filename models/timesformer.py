@@ -63,8 +63,7 @@ class TimesformerModel(BaseVideoModel):
             logits (torch.Tensor): Raw logits for each event (before applying sigmoid).
         """
         outputs = self.timesformer(pixel_values, output_hidden_states=True)
-        hidden_states = outputs.hidden_states[-1]  # shape: [B, seq_len, hidden_size]
-        pooled = hidden_states.mean(dim=1)         # mean pooling across sequence
+        pooled = outputs.pooler_output # Use the pooled output (CLS token)
         logits = self.event_classifier(pooled)
         return logits
 
