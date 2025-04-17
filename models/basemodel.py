@@ -6,7 +6,7 @@ from torchvision.transforms import transforms
 import cv2
 import numpy as np
 import torch
-from .wBCE import WeightedBCELoss
+# from .wBCE import WeightedBCELoss
 
 class BaseVideoModel(nn.Module):
     """
@@ -58,7 +58,8 @@ class BaseVideoModel(nn.Module):
         elif criterion_name == "crossentropy":
             criterion = torch.nn.CrossEntropyLoss()
         elif criterion_name == "wbce":
-            criterion = WeightedBCELoss(pos_weight=pos_weight, neg_weight=neg_weight)
+            # criterion = WeightedBCELoss(pos_weight=pos_weight, neg_weight=neg_weight)
+            criterion = torch.nn.BCEWithLogitsLoss(pos_weight=pos_weight)
         else:
             raise ValueError(f"Criterion {criterion_name} not available")
         return criterion
