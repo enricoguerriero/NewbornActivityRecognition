@@ -76,7 +76,7 @@ BASE_CONFIG = {
         Respond clearly based on what is visible in the image. Use concise and structured output when possible.
         """,
     "questions": ["Is the baby visible? Answer explicitly 'Yes' or 'No'.", "Is the baby receiving ventilation? Answer explicitly 'Yes' or 'No'.", "Is the baby receiving stimulation? Answer explicitly 'Yes' or 'No'.", "Is the baby receiving suction? Answer explicitly 'Yes' or 'No'."],
-    "question": ["You need to anwer with the following format: [i, j, k, l] where all of them can be 0 or 1. i = 1 if baby is visible, j = 1 if baby is receiving ventilation, k = 1 if baby is receiving stimulation, l = 1 if baby is receiving suction. If the baby is not visible, all of them should be 0. If the baby is visible, but not receiving any treatment, all of them should be 0 except for the i."],
+    "question": "Is the baby / mannequin visible? If yes, is the baby receiving ventilation? Is the baby being stimulated? Is the baby receiving suction?",
     
     }
 
