@@ -145,7 +145,7 @@ def main():
                           evaluation_strategy = CONFIG["evaluation_strategy"],
                           save_strategy = CONFIG["save_strategy"],
                           fp16 = CONFIG["fp16"],
-                          report_to = wandb)
+                          report_to = "wandb")
 
 
     logger.info("...Exiting the main function...")
