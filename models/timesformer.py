@@ -53,7 +53,7 @@ class TimesformerModel(BaseVideoModel):
         
         trainable = sum(p.numel() for p in self.timesformer.parameters() if p.requires_grad)
         total     = sum(p.numel() for p in self.timesformer.parameters())
-        print(f"Trainable params: {trainable:,} / {total:,}  ({100*trainable/total:.2f}%)")
+        print(f"Trainable params: {trainable:,} / {total:,}  ({100*trainable/total:.2f}%)", flush = True)
         
     def forward(self, pixel_values):
         """
