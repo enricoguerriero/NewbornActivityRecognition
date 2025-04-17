@@ -71,9 +71,15 @@ def main():
                               event_categories = CONFIG["event_categories"],
                               processor = model.image_processor) if "test" or "untrained_test" in tasks else None
     
-    train_loader = train_data.get_data_loader(CONFIG["batch_size"], CONFIG["num_workers"]) if "train" or "finetune" in tasks else None
-    validation_loader = validation_data.get_data_loader(CONFIG["batch_size"], CONFIG["num_workers"]) if "train" or "finetune" in tasks else None
-    test_loader = test_data.get_data_loader(CONFIG["batch_size"], CONFIG["num_workers"]) if "test" or "untrained_test" in tasks else None
+    train_loader = train_data.get_data_loader(batch_size = CONFIG["batch_size"],
+                                              shuffle = True,
+                                              num_workers = CONFIG["num_workers"]) if "train" in tasks or "finetune" in tasks else None
+    validation_loader = validation_data.get_data_loader(batch_size = CONFIG["batch_size"], 
+                                                        shuffle = False,
+                                                        num_workers = CONFIG["num_workers"]) if "train" in tasks or "finetune" in tasks else None
+    test_loader = test_data.get_data_loader(batch_size = CONFIG["batch_size"],
+                                            shuffle = True,
+                                            num_workers = CONFIG["num_workers"]) if "test" in tasks or "untrained_test" in tasks else None
     
     logger.info("...Data loaded...")
     
@@ -107,7 +113,7 @@ def main():
                    wandb = wandb) 
         logger.info(f"History: {history}")
         
-    if "test_untrained" in tasks:
+    if "untrained_test" in tasks:
         logger.info("...Testing the model without knowledge...")
         history = model.test_without_knowledge(dataloader = test_loader, 
                                                questions = CONFIG["questions"],

@@ -323,6 +323,8 @@ class TimesformerModel(BaseVideoModel):
                 history["val_metrics"].append(val_metrics)
                 log_message += (f" | Val Loss = {val_loss:.4f} | Val Acc = {val_accuracy:.2f}% | "
                                 f"Metrics: {val_metrics}")
+                tqdm_message = f"Epoch {epoch}: Train Loss = {train_loss:.4f} | Train Acc = {train_accuracy:.2f}% | " \
+                               f"Val Loss = {val_loss:.4f} | Val Acc = {val_accuracy:.2f}%"
                 
                 if val_loss < best_val_loss - early_stopping_delta:
                     best_val_loss = val_loss
@@ -352,7 +354,7 @@ class TimesformerModel(BaseVideoModel):
                     **({f"val_{k}": v for k, v in val_metrics.items()} if val_loader is not None else {}),
                     "epoch": epoch
                 })
-            epoch_iter.set_postfix_str(log_message)
+            epoch_iter.set_postfix_str(tqdm_message)
             
         # Save the final model
         self.save_model("timesformer_final")

@@ -80,7 +80,7 @@ class VideoLlavaClassifier(BaseVideoModel):
             num_train_epochs=num_train_epochs,
             learning_rate=learning_rate,
             logging_dir=logging_dir,
-            evaluation_strategy=evaluation_strategy,
+            eval_strategy=evaluation_strategy,
             save_strategy=save_strategy,
             fp16=fp16,
             report_to=report_to
