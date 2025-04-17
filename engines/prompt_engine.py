@@ -43,6 +43,9 @@ class PromptEngine:
         except:
             return 2
         
+    def process_input(self, prompt, video):
+        pass
+        
     
     def answer_question(self, frames, system_message, question, seed = 42, temperature = 0.1):
 
@@ -51,19 +54,8 @@ class PromptEngine:
         video = self.process_frames(frames)
         
         prompt = self.prompt_definition(question, system_message, video)        
-        
-        try:
-            inputs = self.processor(
-                text=prompt,
-                videos = video,
-                return_tensors="pt"
-            ).to(self.device)
-        except:
-            inputs = self.processor(
-                text=prompt,
-                images = video,
-                return_tensors="pt"
-            ).to(self.device)
+            
+        inputs = self.process_input(prompt, video)
                     
         generate_kwargs = {
             "max_new_tokens": 20,

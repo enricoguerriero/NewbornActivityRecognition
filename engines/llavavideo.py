@@ -46,5 +46,12 @@ class VideoLLavaEngine(PromptEngine):
         answer = answer.split("ASSISTANT:")[-1].strip()
         return answer
         
-    
-   
+    def process_input(self, prompt: str, video: list):
+        
+        return self.processor(
+            text=prompt,
+            video=video,
+            return_tensors="pt",
+            padding=True,
+            truncation=True
+        ).to(self.device)
