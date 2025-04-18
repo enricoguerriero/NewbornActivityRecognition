@@ -53,7 +53,8 @@ def main():
                               event_categories = CONFIG["event_categories"],
                               processor = model.image_processor,
                               model_name = model_name,
-                              tensor_folder = CONFIG["tensor_folder"]) if "train" or "finetune" in tasks else None
+                              tensor_folder = CONFIG["tensor_folder"],
+                              set_name = "train") if "train" or "finetune" in tasks else None
     validation_data = VideoDataset(video_folder = os.path.join(CONFIG["video_folder"], "validation"),
                                    annotation_folder = os.path.join(CONFIG["annotation_folder"], "validation"),
                                    clip_length = CONFIG["clip_length"],
@@ -64,7 +65,8 @@ def main():
                                    event_categories = CONFIG["event_categories"],
                                    processor = model.image_processor,
                                    model_name = model_name,
-                                   tensor_folder = CONFIG["tensor_folder"]) if "train" or "finetune" in tasks else None
+                                   tensor_folder = CONFIG["tensor_folder"],
+                                   set_name = "validation") if "train" or "finetune" in tasks else None
     test_data = VideoDataset(video_folder = os.path.join(CONFIG["video_folder"], "test"),
                               annotation_folder = os.path.join(CONFIG["annotation_folder"], "test"),
                               clip_length = CONFIG["clip_length"],
@@ -75,7 +77,8 @@ def main():
                               event_categories = CONFIG["event_categories"],
                               processor = model.image_processor,
                               model_name = model_name,
-                              tensor_folder = CONFIG["tensor_folder"]) if "test" or "untrained_test" in tasks else None
+                              tensor_folder = CONFIG["tensor_folder"],
+                              set_name = "test") if "test" or "untrained_test" in tasks else None
     
     train_loader = train_data.get_data_loader(batch_size = CONFIG["batch_size"],
                                               shuffle = True,
