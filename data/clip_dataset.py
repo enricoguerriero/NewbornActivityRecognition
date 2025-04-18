@@ -295,12 +295,12 @@ class VideoDataset(Dataset):
     def get_video_tensors(self, model_name):
         
         # Check if the tensors already exist
-        video_tensors_path = os.path.join(self.tensor_folder, model_name)
+        video_tensors_path = os.path.join(self.tensor_folder, model_name, "video_tensors.pt")
         if os.path.exists(video_tensors_path):
             self.video_tensors = torch.load(video_tensors_path)
-            return
-        # If not, create the directory and initialize the tensors
-        os.makedirs(video_tensors_path, exist_ok=True)
+            return self.video_tensors
+        # If not, create the directory if it doesn't exist
+        os.makedirs(os.path.dirname(os.path.join(self.tensor_folder, model_name)), exist_ok=True)
         self.video_tensors = {}
         self.store_tensors()
         # Save the tensors to disk
