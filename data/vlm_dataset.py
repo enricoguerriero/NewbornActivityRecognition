@@ -22,7 +22,7 @@ class ClipDataset(Dataset):
         labels = video_data['labels']
        
         inputs = self.processor(text=self.prompt, images=frames, return_tensors="pt", padding=True)
-        
+        print(inputs.keys(), flush = True)
         return {
             "input_ids": inputs["input_ids"].squeeze(0),
             "attention_mask": inputs["attention_mask"].squeeze(0),
