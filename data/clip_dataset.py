@@ -10,7 +10,7 @@ class VideoDataset(Dataset):
     def __init__(self, video_folder: str, annotation_folder: str, 
                  clip_length: float, overlapping: float, size: tuple, 
                  frames_per_second: int, tensors=False, event_categories: list[str] = [],
-                 exploring: bool = False, processor = None, model_name = None, tensor_folder = None):
+                 exploring: bool = False, processor = None, model_name = None, tensor_folder = None, set_name = None):
         self.video_folder = video_folder
         self.video_list = sorted(os.listdir(video_folder))
         self.annotation_folder = annotation_folder
@@ -24,7 +24,7 @@ class VideoDataset(Dataset):
         self.video_tensors = None
         if tensors:
             # Check if the video tensors already exist and load them.
-            self.get_video_tensors(model_name)
+            self.get_video_tensors(model_name, set_name)
                 
         self.event_categories = event_categories if event_categories else ["Baby visible", "Ventilation", "Stimulation", "Suction"]
         
@@ -292,16 +292,17 @@ class VideoDataset(Dataset):
         return pos_weight, neg_weight
 
 
-    def get_video_tensors(self, model_name):
+    def get_video_tensors(self, model_name, set_name=None):
         
+        self.file_name = set_name + "_video_tensors.pt" if set_name else "video_tensors.pt"
         # Check if the tensors already exist
-        video_tensors_path = os.path.join(self.tensor_folder, model_name, "video_tensors.pt")
-        if os.path.exists(video_tensors_path):
-            self.video_tensors = torch.load(video_tensors_path)
+        self.video_tensors_path = os.path.join(self.tensor_folder, model_name, self.file_name)
+        if os.path.exists(self.video_tensors_path):
+            self.video_tensors = torch.load(self.video_tensors_path)
             return self.video_tensors
         # If not, create the directory if it doesn't exist
-        os.makedirs(os.path.dirname(video_tensors_path), exist_ok=True)
+        os.makedirs(os.path.dirname(self.video_tensors_path), exist_ok=True)
         self.video_tensors = {}
         self.store_tensors()
         # Save the tensors to disk
-        torch.save(self.video_tensors, video_tensors_path)
+        torch.save(self.video_tensors, self.video_tensors_path)
