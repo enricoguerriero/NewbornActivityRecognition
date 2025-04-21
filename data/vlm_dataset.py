@@ -26,6 +26,6 @@ class ClipDataset(Dataset):
         return {
             "input_ids": inputs["input_ids"].squeeze(0),
             "attention_mask": inputs["attention_mask"].squeeze(0),
-            "pixel_values": inputs["pixel_values"].squeeze(0),
+            "pixel_values": inputs["pixel_values_videos"].squeeze(0),
             "labels": torch.tensor(labels, dtype=torch.long)
         }
