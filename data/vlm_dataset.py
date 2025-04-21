@@ -57,7 +57,6 @@ class ClipDataset(VideoDataset):
             videos=[frames],
             return_tensors="pt",
             padding=True,
-            do_rescale=False,
         )
 
         # 3) squeeze out the batch dimension and re-package
