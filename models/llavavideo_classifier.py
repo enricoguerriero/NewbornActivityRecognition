@@ -52,8 +52,8 @@ class VideoLlavaClassifier(BaseVideoModel):
         print("  labels.shape:", labels.shape, flush=True)
         
         if labels is not None:
-            loss_fct = nn.CrossEntropyLoss()
-            loss = loss_fct(logits.view(-1, self.classifier[-1].out_features), labels.view(-1))
+            loss_fct = nn.BCEWithLogitsLoss()
+            loss = loss_fct(logits, labels.float())
         else:
             loss = None
         
