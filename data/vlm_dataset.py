@@ -56,7 +56,8 @@ class ClipDataset(VideoDataset):
             text=[self.prompt],
             videos=[frames],
             return_tensors="pt",
-            padding=True
+            padding=True,
+            rescale = False,
         )
 
         # 3) squeeze out the batch dimension and re-package
