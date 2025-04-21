@@ -44,14 +44,10 @@ class ClipDataset(VideoDataset):
         return super().__len__()
 
     def __getitem__(self, idx):
-        # 1) get the raw clip dict from VideoDataset
         video_data = super().__getitem__(idx)
         frames = video_data['frames']         # Tensor [T, C, H, W]
         labels = video_data['labels']         # Tensor [n_events]
 
-        # 2) run your multimodal processor
-        #    - wrap prompt in a list to get batch dimension
-        #    - wrap frames in a list as well
         inputs = self.prompt_processor(
             text=[self.prompt],
             videos=[frames],
@@ -59,13 +55,9 @@ class ClipDataset(VideoDataset):
             padding=True,
         )
 
-        # 3) squeeze out the batch dimension and re-package
         return {
             "input_ids":           inputs["input_ids"].squeeze(0),
             "attention_mask":      inputs["attention_mask"].squeeze(0),
-            # some processors return "pixel_values", others "pixel_values_videos"
-            # adjust the key below to match what your processor actually returns:
-            # "pixel_values": inputs.get("pixel_values_videos", inputs["pixel_values"]).squeeze(0),
             "pixel_values":        inputs["pixel_values_videos"].squeeze(0),
             "labels":              labels.long(),
         }
