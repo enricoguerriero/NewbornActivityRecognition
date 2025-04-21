@@ -22,7 +22,6 @@ class VideoLlavaClassifier(BaseVideoModel):
                 torch_dtype=torch.float16
             ).to(self.device)
 
-        # Assume the embedding size comes from the base language model inside
         hidden_size = self.model.get_input_embeddings().embedding_dim
 
         self.classifier = nn.Sequential(
@@ -31,6 +30,10 @@ class VideoLlavaClassifier(BaseVideoModel):
             nn.Dropout(0.1),
             nn.Linear(512, num_classes)
         )
+        
+        for name, param in self.model.named_parameters():
+            if "classifier" not in name:
+                param.requires_grad = False
         
         self.image_processor = None
 
@@ -97,8 +100,6 @@ class VideoLlavaClassifier(BaseVideoModel):
             data_collator=data_collator
         )
         trainer.train()
-        trainer.save_model(output_dir)
-        trainer.evaluate(eval_dataset)
         trainer.save_model(output_dir)
         return trainer
         
