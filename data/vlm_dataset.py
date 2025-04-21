@@ -22,10 +22,18 @@ class ClipDataset(Dataset):
         labels = video_data['labels']
        
         inputs = self.processor(text=self.prompt, videos=frames, return_tensors="pt", padding=True)
-        print(inputs.keys(), flush = True)
         return {
             "input_ids": inputs["input_ids"].squeeze(0),
             "attention_mask": inputs["attention_mask"].squeeze(0),
-            "pixel_values": inputs["pixel_values_videos"].squeeze(0),
+            "pixel_values_videos": inputs["pixel_values_videos"].squeeze(0),
             "labels": torch.tensor(labels, dtype=torch.long)
+        }
+        
+    
+    def collate_fn(self, batch):
+        return {
+            "input_ids": torch.stack([item["input_ids"] for item in batch]),
+            "attention_mask": torch.stack([item["attention_mask"] for item in batch]),
+            "pixel_values_videos": torch.stack([item["pixel_values_videos"] for item in batch]),
+            "labels": torch.stack([item["labels"] for item in batch]),
         }
