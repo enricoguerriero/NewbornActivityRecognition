@@ -37,7 +37,7 @@ class ClipDataset(VideoDataset):
             set_name=set_name,
         )
         self.prompt = prompt
-        self.prompt_processor = processor  # ensure it's on self
+        self.prompt_processor = prompt_processor  # ensure it's on self
 
     def __len__(self):
         # Inherited behavior is correct; you could also just omit this method.
