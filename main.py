@@ -54,7 +54,7 @@ def main():
                               processor = model.image_processor,
                               model_name = model_name,
                               tensor_folder = CONFIG["tensor_folder"],
-                              set_name = "train") if "train" or "finetune" in tasks else None
+                              set_name = "train") if "train" in tasks else None
     validation_data = VideoDataset(video_folder = os.path.join(CONFIG["video_folder"], "validation"),
                                    annotation_folder = os.path.join(CONFIG["annotation_folder"], "validation"),
                                    clip_length = CONFIG["clip_length"],
@@ -66,7 +66,7 @@ def main():
                                    processor = model.image_processor,
                                    model_name = model_name,
                                    tensor_folder = CONFIG["tensor_folder"],
-                                   set_name = "validation") if "train" or "finetune" in tasks else None
+                                   set_name = "validation") if "train" in tasks else None
     test_data = VideoDataset(video_folder = os.path.join(CONFIG["video_folder"], "test"),
                               annotation_folder = os.path.join(CONFIG["annotation_folder"], "test"),
                               clip_length = CONFIG["clip_length"],
@@ -82,10 +82,10 @@ def main():
     
     train_loader = train_data.get_data_loader(batch_size = CONFIG["batch_size"],
                                               shuffle = True,
-                                              num_workers = CONFIG["num_workers"]) if "train" in tasks or "finetune" in tasks else None
+                                              num_workers = CONFIG["num_workers"]) if "train" in tasks else None
     validation_loader = validation_data.get_data_loader(batch_size = CONFIG["batch_size"], 
                                                         shuffle = False,
-                                                        num_workers = CONFIG["num_workers"]) if "train" in tasks or "finetune" in tasks else None
+                                                        num_workers = CONFIG["num_workers"]) if "train" in tasks in tasks else None
     test_loader = test_data.get_data_loader(batch_size = CONFIG["batch_size"],
                                             shuffle = True,
                                             num_workers = CONFIG["num_workers"]) if "test" in tasks or "untrained_test" in tasks else None
@@ -135,14 +135,39 @@ def main():
         logger.info("...Fine-tuning the model...")
         logger.info(f"Fine-tuning with the following configuration: {CONFIG}")
         logger.info("Creating the dataset for fine-tuning...")
-        train_dataset = ClipDataset(video_dataset=train_data,
+        train_dataset = ClipDataset(video_folder = os.path.join(CONFIG["video_folder"], "train"),
+                                    annotation_folder = os.path.join(CONFIG["annotation_folder"], "train"),
+                                    clip_length = CONFIG["clip_length"],
+                                    frames_per_second = CONFIG["frames_per_second"],
+                                    overlapping = CONFIG["overlap"],
+                                    size = CONFIG["target_size"],
+                                    tensors = True,
+                                    event_categories = CONFIG["event_categories"],
+                                    processor = model.image_processor,
+                                    model_name = model_name,
+                                    tensor_folder = CONFIG["tensor_folder"],
+                                    set_name = "train",
+                                    processor = model.processor,
                                     prompt = model.prompt_definition(system_message = CONFIG["system_message"],
-                                                                    question = CONFIG["question"]),
-                                    processor=model.processor)
-        val_dataset = ClipDataset(video_dataset=validation_data, 
+                                                                    question = CONFIG["question"]))
+        val_dataset = ClipDataset(video_folder = os.path.join(CONFIG["video_folder"], "validation"),
+                                  annotation_folder = os.path.join(CONFIG["annotation_folder"], "validation"),
+                                  clip_length = CONFIG["clip_length"],
+                                  frames_per_second = CONFIG["frames_per_second"],
+                                  overlapping = CONFIG["overlap"],
+                                  size = CONFIG["target_size"],
+                                  tensors = True,
+                                  event_categories = CONFIG["event_categories"],
+                                  processor = model.image_processor,
+                                  model_name = model_name,
+                                  tensor_folder = CONFIG["tensor_folder"],
+                                  set_name = "validation",
+                                  processor = model.processor,
                                   prompt = model.prompt_definition(system_message = CONFIG["system_message"],
-                                                                  question = CONFIG["question"]),
-                                  processor=model.processor)
+                                                                  question = CONFIG["question"]))
+        logger.info("...Dataset for fine-tuning created...")
+        logger.info(f"Train dataset size: {len(train_dataset)}")
+        logger.info(f"Validation dataset size: {len(val_dataset)}")
         logger.info("Fine-tuning the model...")
         model.train_model(train_dataset = train_dataset,
                           eval_dataset = val_dataset,
