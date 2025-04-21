@@ -45,7 +45,7 @@ class VideoLlavaClassifier(BaseVideoModel):
 
         last_layer = outputs.hidden_states[-1]  # Use CLS or first token
         pooled = last_layer[:, 0, :]  # CLS token representation
-        logits = self.classifier(pooled)
+        logits = self.classifier(pooled.float())
         
         if labels is not None:
             loss_fct = nn.CrossEntropyLoss()
