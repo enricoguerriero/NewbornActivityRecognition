@@ -39,10 +39,12 @@ class VideoLlavaClassifier(BaseVideoModel):
             pixel_values_videos=pixel_values,
             input_ids=input_ids,
             attention_mask=attention_mask,
-            return_dict=True
+            return_dict=True,
+            output_hidden_states=True,
         )
 
-        pooled = outputs.last_hidden_state[:, 0]  # Use CLS or first token
+        last_layer = outputs.hidden_states[-1]  # Use CLS or first token
+        pooled = last_layer[:, 0, :]  # CLS token representation
         logits = self.classifier(pooled)
         
         if labels is not None:
