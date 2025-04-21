@@ -47,9 +47,6 @@ class VideoLlavaClassifier(BaseVideoModel):
         pooled = last_layer[:, 0, :]  # CLS token representation
         logits = self.classifier(pooled.float())
         
-        print("  pooled.shape:", pooled.shape, flush=True)
-        print("  logits.shape:", logits.shape, flush=True)
-        print("  labels.shape:", labels.shape, flush=True)
         
         if labels is not None:
             loss_fct = nn.BCEWithLogitsLoss()
