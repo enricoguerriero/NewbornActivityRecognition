@@ -65,6 +65,7 @@ class ClipDataset(VideoDataset):
             "attention_mask":      inputs["attention_mask"].squeeze(0),
             # some processors return "pixel_values", others "pixel_values_videos"
             # adjust the key below to match what your processor actually returns:
-            "pixel_values": inputs.get("pixel_values_videos", inputs["pixel_values"]).squeeze(0),
+            # "pixel_values": inputs.get("pixel_values_videos", inputs["pixel_values"]).squeeze(0),
+            "pixel_values":        inputs["pixel_values_videos"].squeeze(0),
             "labels":              labels.long(),
         }
