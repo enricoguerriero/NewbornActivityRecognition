@@ -147,7 +147,7 @@ def main():
                                     model_name = model_name,
                                     tensor_folder = CONFIG["tensor_folder"],
                                     set_name = "train",
-                                    processor = model.processor,
+                                    prompt_processor = model.processor,
                                     prompt = model.prompt_definition(system_message = CONFIG["system_message"],
                                                                     question = CONFIG["question"]))
         val_dataset = ClipDataset(video_folder = os.path.join(CONFIG["video_folder"], "validation"),
@@ -162,7 +162,7 @@ def main():
                                   model_name = model_name,
                                   tensor_folder = CONFIG["tensor_folder"],
                                   set_name = "validation",
-                                  processor = model.processor,
+                                  prompt_processor = model.processor,
                                   prompt = model.prompt_definition(system_message = CONFIG["system_message"],
                                                                   question = CONFIG["question"]))
         logger.info("...Dataset for fine-tuning created...")

@@ -10,7 +10,8 @@ class ClipDataset(VideoDataset):
         overlapping: float,
         size: tuple,
         frames_per_second: int,
-        processor,              # your multimodal processor
+        processor, 
+        prompt_processor, # your multimodal processor
         prompt: str,            # text prompt you want to prepend to every clip
         tensors: bool = False,
         event_categories: list[str] = None,
@@ -36,7 +37,7 @@ class ClipDataset(VideoDataset):
             set_name=set_name,
         )
         self.prompt = prompt
-        self.processor = processor  # ensure it's on self
+        self.prompt_processor = processor  # ensure it's on self
 
     def __len__(self):
         # Inherited behavior is correct; you could also just omit this method.
@@ -51,7 +52,7 @@ class ClipDataset(VideoDataset):
         # 2) run your multimodal processor
         #    - wrap prompt in a list to get batch dimension
         #    - wrap frames in a list as well
-        inputs = self.processor(
+        inputs = self.prompt_processor(
             text=[self.prompt],
             videos=[frames],
             return_tensors="pt",
@@ -64,6 +65,6 @@ class ClipDataset(VideoDataset):
             "attention_mask":      inputs["attention_mask"].squeeze(0),
             # some processors return "pixel_values", others "pixel_values_videos"
             # adjust the key below to match what your processor actually returns:
-            "pixel_values_videos": inputs.get("pixel_values_videos", inputs["pixel_values"]).squeeze(0),
+            "pixel_values": inputs.get("pixel_values_videos", inputs["pixel_values"]).squeeze(0),
             "labels":              labels.long(),
         }
