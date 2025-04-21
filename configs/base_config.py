@@ -21,8 +21,8 @@ BASE_CONFIG = {
     "early_stopping_delta": 0.001,
     
     # training parameters for vlm
-    "per_device_train_batch_size": 2,
-    "per_device_eval_batch_size": 2,
+    "per_device_train_batch_size": 1,
+    "per_device_eval_batch_size": 1,
     "gradient_accumulation_steps": 2,
     "num_train_epochs": 5,
     "learning_rate": 2e-5,

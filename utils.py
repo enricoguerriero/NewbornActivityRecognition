@@ -77,8 +77,6 @@ def wandb_session(project_name, model_name, config):
     return wandb
 
 def collate_fn(batch):
-    for item in batch:
-        print(f'item keys: {item.keys()}', flush=True)
     return {
         "input_ids": torch.stack([item["input_ids"] for item in batch]),
         "attention_mask": torch.stack([item["attention_mask"] for item in batch]),
