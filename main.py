@@ -166,6 +166,8 @@ def main():
                                   prompt = model.prompt_definition(system_message = CONFIG["system_message"],
                                                                   question = CONFIG["question"]))
         logger.info("...Dataset for fine-tuning created...")
+        pos_weights, neg_weights = train_dataset.weight_computation()
+        model.set_weights(weights = pos_weights)
         logger.info(f"Train dataset size: {len(train_dataset)}")
         logger.info(f"Validation dataset size: {len(val_dataset)}")
         logger.info("Fine-tuning the model...")
@@ -183,6 +185,32 @@ def main():
                           save_strategy = CONFIG["save_strategy"],
                           fp16 = CONFIG["fp16"],
                           report_to = "wandb")
+        
+    if "testVLM" in tasks:
+        logger.info("...Creating the dataset...")
+        test_dataset = ClipDataset(video_folder = os.path.join(CONFIG["video_folder"], "test"),
+                                   annotation_folder = os.path.join(CONFIG["annotation_folder"], "test"),
+                                   clip_length = CONFIG["clip_length"],
+                                   frames_per_second = CONFIG["frames_per_second"],
+                                   overlapping = CONFIG["overlap"],
+                                   size = CONFIG["target_size"],
+                                   tensors = True,
+                                   event_categories = CONFIG["event_categories"],
+                                   processor = model.image_processor,
+                                   model_name = model_name,
+                                   tensor_folder = CONFIG["tensor_folder"],
+                                   set_name = "test",
+                                   prompt_processor = model.processor,
+                                   prompt = model.prompt_definition(system_message = CONFIG["system_message"],
+                                                                   question = CONFIG["question"]))
+        
+        logger.info("...Dataset created...")
+        logger.info(f"Test dataset size: {len(test_dataset)}")
+        logger.info("...Testing the model...")
+        model.test_model(test_dataset = test_dataset,
+                         data_collator = collate_fn,
+                         batch_size = CONFIG["batch_size"],
+                         threshold = CONFIG["threshold"])
 
 
     logger.info("...Exiting the main function...")
