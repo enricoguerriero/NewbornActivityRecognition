@@ -17,7 +17,7 @@ def main():
     model_name = args.model_name
     tasks = args.tasks
     model_to_load = args.load_model
-    checkpoint = args.checkpoint
+    checkpoint = os.path.join("models/saved", args.checkpoint)
         
     setup_all_loggers(model_name, tasks)
     
