@@ -11,11 +11,13 @@ def main():
     parser.add_argument("--model_name", type=str, required=True, help="Name of the model to use.")
     parser.add_argument("--tasks", type=str, nargs='+', required=True, help="List of tasks to perform.")
     parser.add_argument("--load_model", type=str, default=None, help="Path to the model to load.")
+    parser.add_argument("--checkpoint", type=str, default=None, help="Path to the checkpoint to load.")
     args = parser.parse_args()
     
     model_name = args.model_name
     tasks = args.tasks
     model_to_load = args.load_model
+    checkpoint = args.checkpoint
         
     setup_all_loggers(model_name, tasks)
     
@@ -28,7 +30,7 @@ def main():
     
     logger.info(f"Tasks: {tasks}")
     logger.info(f"Model: {model_name}")
-    model = select_model(model_name)
+    model = select_model(model_name, checkpoint)
     logger.info(f"Model initialized: {model_name}")
     
     if model_to_load:

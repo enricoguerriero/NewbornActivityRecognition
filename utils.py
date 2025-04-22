@@ -36,13 +36,15 @@ def setup_all_loggers(model_name: str, tasks: list):
     for task in tasks:
         setup_logger(f'{model_name}_{task}', model_name)
               
-def select_model(model_name):
+def select_model(model_name, checkpoint=None):
     """Function to select a model."""
     if model_name == "timesformer":
         from models.timesformer import TimesformerModel
         return TimesformerModel()
     elif model_name == "llavavideo_classifier":
         from models.llavavideo_classifier import VideoLlavaClassifier
+        if checkpoint is not None:
+            return VideoLlavaClassifier(checkpoint=checkpoint)            
         return VideoLlavaClassifier()
     else:
         from models.promptLLM import PromptLLMModel
